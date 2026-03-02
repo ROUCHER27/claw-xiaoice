@@ -5,10 +5,17 @@
 
 set -e
 
-# 禁用代理
-unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+# 获取脚本目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-WEBHOOK_URL="http://localhost:3002/webhooks/xiaoice"
+# 加载共享库
+source "$SCRIPT_DIR/lib/config.sh"
+source "$SCRIPT_DIR/lib/colors.sh"
+source "$SCRIPT_DIR/lib/output.sh"
+source "$SCRIPT_DIR/lib/proxy-setup.sh"
+
+# 禁用代理
+disable_proxy
 
 echo "╔═══════════════════════════════════════════════════════════╗"
 echo "║     测试 OpenClaw 响应文本提取功能                     ║"
@@ -16,7 +23,7 @@ echo "╚═══════════════════════�
 echo ""
 
 # 测试 1: 简单问候
-echo "测试 1: 发送简单问候..."
+print_info "测试 1: 发送简单问候..."
 RESPONSE=$(curl -s --noproxy "*" -X POST "$WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{"askText":"你好","sessionId":"test-extract-1","stream":false}')
@@ -30,7 +37,7 @@ echo "提取的纯文本: $REPLY_TEXT"
 echo ""
 
 # 测试 2: 复杂问题
-echo "测试 2: 发送复杂问题..."
+print_info "测试 2: 发送复杂问题..."
 RESPONSE=$(curl -s --noproxy "*" -X POST "$WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{"askText":"请用一句话介绍人工智能","sessionId":"test-extract-2","stream":false}')
