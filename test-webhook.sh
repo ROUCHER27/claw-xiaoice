@@ -5,41 +5,28 @@
 
 set -e
 
-# Disable proxy for localhost connections
-unset http_proxy
-unset https_proxy
-unset HTTP_PROXY
-unset HTTPS_PROXY
-export NO_PROXY=localhost,127.0.0.1
+# 获取脚本目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-WEBHOOK_URL="http://localhost:3002/webhooks/xiaoice"
+# 加载共享库
+source "$SCRIPT_DIR/lib/config.sh"
+source "$SCRIPT_DIR/lib/colors.sh"
+source "$SCRIPT_DIR/lib/output.sh"
+source "$SCRIPT_DIR/lib/common.sh"
+source "$SCRIPT_DIR/lib/proxy-setup.sh"
+
+# 禁用代理（本地测试）
+disable_proxy
+
+# 证据目录
 EVIDENCE_DIR="/mnt/c/Users/yuyirong/.sisyphus/evidence"
-ACCESS_KEY="test-key"
-SECRET_KEY="test-secret"
 
-# Colors for output
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-echo "=========================================="
-echo "XiaoIce Webhook Test Suite"
-echo "=========================================="
-echo ""
-
-# Function to generate SHA512 signature
-generate_signature() {
-    local body="$1"
-    local timestamp="$2"
-    local message="${body}${SECRET_KEY}${timestamp}"
-    echo -n "$message" | openssl dgst -sha512 | awk '{print $2}'
-}
+print_title "XiaoIce Webhook Test Suite"
 
 # Test 1: Valid signature with non-streaming response
-echo -e "${YELLOW}Test 1: Valid signature (non-streaming)${NC}"
+print_info "Test 1: Valid signature (non-streaming)"
 BODY='{"askText":"你好，请介绍一下你自己","sessionId":"test-session-1","traceId":"trace-001","languageCode":"zh"}'
-TIMESTAMP=$(date +%s)000
+TIMESTAMP=$(get_timestamp)
 SIGNATURE=$(generate_signature "$BODY" "$TIMESTAMP")
 
 curl -X POST "$WEBHOOK_URL" \
@@ -52,13 +39,14 @@ curl -X POST "$WEBHOOK_URL" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-2-valid-signature.txt"
 
-echo -e "${GREEN}✓ Test 1 completed${NC}\n"
+print_success "Test 1 completed"
+echo ""
 sleep 2
 
 # Test 2: Invalid signature
-echo -e "${YELLOW}Test 2: Invalid signature${NC}"
+print_info "Test 2: Invalid signature"
 BODY='{"askText":"测试无效签名","sessionId":"test-session-2","traceId":"trace-002"}'
-TIMESTAMP=$(date +%s)000
+TIMESTAMP=$(get_timestamp)
 INVALID_SIGNATURE="0000000000000000000000000000000000000000000000000000000000000000"
 
 curl -X POST "$WEBHOOK_URL" \
@@ -71,11 +59,12 @@ curl -X POST "$WEBHOOK_URL" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-2-invalid-signature.txt"
 
-echo -e "${GREEN}✓ Test 2 completed${NC}\n"
+print_success "Test 2 completed"
+echo ""
 sleep 1
 
 # Test 3: Missing headers
-echo -e "${YELLOW}Test 3: Missing authentication headers${NC}"
+print_info "Test 3: Missing authentication headers"
 BODY='{"askText":"测试缺失头部","sessionId":"test-session-3"}'
 
 curl -X POST "$WEBHOOK_URL" \
@@ -85,13 +74,14 @@ curl -X POST "$WEBHOOK_URL" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-2-missing-headers.txt"
 
-echo -e "${GREEN}✓ Test 3 completed${NC}\n"
+print_success "Test 3 completed"
+echo ""
 sleep 1
 
 # Test 4: Streaming response
-echo -e "${YELLOW}Test 4: Streaming SSE response${NC}"
+print_info "Test 4: Streaming SSE response"
 BODY='{"askText":"请用三句话介绍人工智能","sessionId":"test-session-4","traceId":"trace-004"}'
-TIMESTAMP=$(date +%s)000
+TIMESTAMP=$(get_timestamp)
 SIGNATURE=$(generate_signature "$BODY" "$TIMESTAMP")
 
 curl -N -X POST "$WEBHOOK_URL" \
@@ -105,13 +95,14 @@ curl -N -X POST "$WEBHOOK_URL" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-3-streaming-response.txt"
 
-echo -e "${GREEN}✓ Test 4 completed${NC}\n"
+print_success "Test 4 completed"
+echo ""
 sleep 2
 
 # Test 5: Non-streaming response (explicit)
-echo -e "${YELLOW}Test 5: Non-streaming response${NC}"
+print_info "Test 5: Non-streaming response"
 BODY='{"askText":"1+1等于几？","sessionId":"test-session-5","traceId":"trace-005"}'
-TIMESTAMP=$(date +%s)000
+TIMESTAMP=$(get_timestamp)
 SIGNATURE=$(generate_signature "$BODY" "$TIMESTAMP")
 
 curl -X POST "$WEBHOOK_URL" \
@@ -125,20 +116,22 @@ curl -X POST "$WEBHOOK_URL" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-3-non-streaming-response.txt"
 
-echo -e "${GREEN}✓ Test 5 completed${NC}\n"
+print_success "Test 5 completed"
+echo ""
 sleep 1
 
 # Test 6: Health check
-echo -e "${YELLOW}Test 6: Health check endpoint${NC}"
-curl -X GET "http://localhost:3002/health" \
+print_info "Test 6: Health check endpoint"
+curl -X GET "http://localhost:$WEBHOOK_PORT/health" \
   --noproxy "*" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-health-check.txt"
 
-echo -e "${GREEN}✓ Test 6 completed${NC}\n"
+print_success "Test 6 completed"
+echo ""
 
 # Test 7: Replay attack protection (old timestamp)
-echo -e "${YELLOW}Test 7: Replay attack protection${NC}"
+print_info "Test 7: Replay attack protection"
 BODY='{"askText":"测试重放攻击","sessionId":"test-session-7"}'
 OLD_TIMESTAMP=$(($(date +%s) - 600))000  # 10 minutes ago
 SIGNATURE=$(generate_signature "$BODY" "$OLD_TIMESTAMP")
@@ -153,10 +146,11 @@ curl -X POST "$WEBHOOK_URL" \
   -w "\nHTTP Status: %{http_code}\n" \
   -s | tee "${EVIDENCE_DIR}/task-replay-attack.txt"
 
-echo -e "${GREEN}✓ Test 7 completed${NC}\n"
+print_success "Test 7 completed"
+echo ""
 
 # Generate test summary
-echo -e "${YELLOW}Generating test summary...${NC}"
+print_info "Generating test summary..."
 cat > "${EVIDENCE_DIR}/task-5-test-summary.txt" << EOF
 XiaoIce Webhook Integration - Test Summary
 ==========================================
@@ -201,9 +195,10 @@ Evidence Files:
 All tests completed successfully!
 EOF
 
-echo -e "${GREEN}✓ Test summary generated${NC}\n"
+print_success "Test summary generated"
+echo ""
 
-echo "=========================================="
-echo -e "${GREEN}All tests completed!${NC}"
+print_separator
+print_success "All tests completed!"
 echo "Evidence saved to: $EVIDENCE_DIR"
-echo "=========================================="
+print_separator
