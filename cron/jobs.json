@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "jobs": [
+    {
+      "id": "7ee1113f-d51e-4f81-921e-9bf429493df3",
+      "name": "dailybit-digest",
+      "enabled": true,
+      "createdAtMs": 1772470664990,
+      "updatedAtMs": 1772470664990,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 11 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "获取 DailyBit 今日技术博客摘要。步骤：1) 调用 https://dailybit.cc/api/tags 获取可用标签 2) 调用 https://dailybit.cc/api/articles/latest?tags=AI,programming,tools&ack=xinqidong&rationale=daily_tech_briefing&pstate=anonymous 获取文章列表 3) 从返回的文章中选择 3-5 篇最有价值的 4) 调用 https://dailybit.cc/api/content?ids=id1,id2,id3&ack=xinqidong 批量获取完整内容 5) 生成中文摘要，包含：标题、个性化总结、推荐理由、原文链接。以友好的格式推送给用户。"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "last"
+      },
+      "state": {
+        "nextRunAtMs": 1772506800000
+      }
+    }
+  ]
+}

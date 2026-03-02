@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "node",
+      "args": ["/home/yirongbest/.local/mcp/node_modules/@playwright/mcp/cli.js"]
+    },
+    "douyin-upload": {
+      "command": "node",
+      "args": ["/home/yirongbest/.local/mcp/douyin/node_modules/douyin-mcp-server/dist/index.js"]
+    }
+  }
+}
