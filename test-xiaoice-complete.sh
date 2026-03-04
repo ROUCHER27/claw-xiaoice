@@ -85,8 +85,8 @@ test_basic_dialogue() {
 
   if [ "$status" = "200" ]; then
     # 验证响应格式
-    local reply_text=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get '.replyText' 2>/dev/null)
-    local reply_type=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get '.replyType' 2>/dev/null)
+    local reply_text=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
+    local reply_type=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyType', ''))" 2>/dev/null)
 
     if [ -n "$reply_text" ] && [ "$reply_text" != "null" ]; then
       echo "  回复文本: ${reply_text:0:50}..."
@@ -168,7 +168,7 @@ test_multi_turn_dialogue() {
     -H "x-xiaoice-key: $ACCESS_KEY" \
     -d "$body1")
 
-  local reply1=$(echo "$response1" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get '.replyText' 2>/dev/null)
+  local reply1=$(echo "$response1" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
   echo "    回复: ${reply1:0:50}..."
 
   sleep 1
@@ -192,7 +192,7 @@ test_multi_turn_dialogue() {
     -H "x-xiaoice-key: $ACCESS_KEY" \
     -d "$body2")
 
-  local reply2=$(echo "$response2" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get '.replyText' 2>/dev/null)
+  local reply2=$(echo "$response2" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
   echo "    回复: ${reply2:0:50}..."
 
   # 检查是否记住了名字
@@ -281,7 +281,7 @@ test_extra_fields() {
   echo "  HTTP 状态: $status"
 
   if [ "$status" = "200" ]; then
-    local extra=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get '.extra' 2>/dev/null)
+    local extra=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('extra', ''))" 2>/dev/null)
     echo "  响应 extra: $extra"
     return 0
   else
@@ -321,7 +321,7 @@ test_long_text() {
   echo "  HTTP 状态: $status"
 
   if [ "$status" = "200" ]; then
-    local reply_text=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get '.replyText' 2>/dev/null)
+    local reply_text=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
     local reply_length=${#reply_text}
     echo "  回复长度: $reply_length 字符"
     echo "  回复预览: ${reply_text:0:100}..."
@@ -394,7 +394,7 @@ test_response_format() {
   local all_present=true
 
   for field in "${required_fields[@]}"; do
-    local value=$(echo "$response" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get ".$field" 2>/dev/null)
+    local value=$(echo "$response" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('$field', ''))" 2>/dev/null)
     if [ -z "$value" ] || [ "$value" = "null" ]; then
       echo "    ✗ 缺少字段: $field"
       all_present=false
