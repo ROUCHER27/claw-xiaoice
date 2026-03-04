@@ -101,10 +101,21 @@ async function handleXiaoIceDialogue(req, res, config) {
 
       const { askText, sessionId, traceId } = payload;
 
-      // Validate required fields
-      if (!askText) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Missing askText field' }));
+      // Validate required fields and empty text (Bad Case 3 fix)
+      if (!askText || askText.trim() === '') {
+        log('WARN', 'Empty or missing askText received', { sessionId, hasAskText: !!askText });
+
+        if (isStreaming) {
+          res.writeHead(200, {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+          });
+          res.end('请说点什么吧～');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('请说点什么吧～');
+        }
         return;
       }
 
