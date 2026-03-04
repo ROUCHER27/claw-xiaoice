@@ -21,10 +21,11 @@ const PORT = process.env.PORT || 3002;
 const XIAOICE_CONFIG = {
   accessKey: process.env.XIAOICE_ACCESS_KEY || 'test-key',
   secretKey: process.env.XIAOICE_SECRET_KEY || 'test-secret',
-  timeout: parseInt(process.env.XIAOICE_TIMEOUT || '18000', 10),
+  timeout: parseInt(process.env.XIAOICE_TIMEOUT || '25000', 10),
   maxBodySize: 10 * 1024 * 1024, // 10MB
   timestampWindow: 300000, // 5 minutes
-  authRequired: process.env.XIAOICE_AUTH_REQUIRED !== 'false' // Default: enabled
+  authRequired: process.env.XIAOICE_AUTH_REQUIRED !== 'false', // Default: enabled
+  voiceOptimization: process.env.XIAOICE_VOICE_OPTIMIZATION !== 'false' // Default: enabled
 };
 
 // 日志函数
@@ -36,12 +37,78 @@ function log(level, message, data = null) {
   }
 }
 
+// 根据问题复杂度选择 thinking level
+function selectThinkingLevel(askText) {
+  const length = askText.length;
+
+  // 检测是否包含复杂关键词（需要工具调用或深度思考）
+  const complexKeywords = ['天气', '查询', '搜索', '计算', '分析', '解释', '为什么', '怎么样', '如何'];
+  const hasComplexKeyword = complexKeywords.some(keyword => askText.includes(keyword));
+
+  // Very short simple greetings: minimal thinking
+  if (length < 10 && !hasComplexKeyword) {
+    return 'minimal';  // Fastest - only for "你好", "嗨" etc
+  }
+
+  // Short questions with complex keywords: medium thinking
+  if (length < 50 && hasComplexKeyword) {
+    return 'medium';
+  }
+
+  // Short questions: low thinking
+  if (length < 100) {
+    return 'low';
+  }
+
+  // Medium questions: medium thinking
+  if (length < 300) {
+    return 'medium';
+  }
+
+  // Long/complex questions: high thinking
+  return 'high';
+}
+
+// 格式化文本以适配语音输出
+function formatForVoice(text) {
+  if (!text) return text;
+
+  // Remove markdown formatting
+  text = text.replace(/\*\*(.+?)\*\*/g, '$1');  // **bold** → bold
+  text = text.replace(/\*(.+?)\*/g, '$1');      // *italic* → italic
+  text = text.replace(/`(.+?)`/g, '$1');        // `code` → code
+  text = text.replace(/^#+\s+/gm, '');          // # headers → plain text
+
+  // Remove list markers
+  text = text.replace(/^[\-\*]\s+/gm, '');      // - item → item
+  text = text.replace(/^\d+\.\s+/gm, '');       // 1. item → item
+
+  // Remove emojis (keep Chinese characters)
+  text = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');  // Remove emojis
+  text = text.replace(/[\u{2600}-\u{26FF}]/gu, '');    // Remove symbols
+  text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, '');    // Remove variation selectors
+  text = text.replace(/[\u{E0000}-\u{E007F}]/gu, ''); // Remove tag characters
+
+  // Clean up extra whitespace and newlines
+  text = text.replace(/\n{3,}/g, '\n\n');       // Max 2 newlines
+  text = text.replace(/\n/g, '，');              // Newlines → commas for voice
+  text = text.replace(/，{2,}/g, '，');          // Remove duplicate commas
+  text = text.replace(/\s+/g, ' ');             // Normalize spaces
+  text = text.trim();
+
+  return text;
+}
+
 // 调用 OpenClaw CLI 处理消息
 async function sendToOpenClaw(payload, isStreaming = false, streamCallback = null) {
   return new Promise((resolve, reject) => {
     const { sessionId, askText } = payload;
     let completed = false;
     let timeoutHandle = null;
+    const startTime = Date.now();
+
+    // 根据问题复杂度选择 thinking level
+    const thinkingLevel = selectThinkingLevel(askText);
 
     // 构建 OpenClaw agent 命令
     const args = [
@@ -49,11 +116,11 @@ async function sendToOpenClaw(payload, isStreaming = false, streamCallback = nul
       '--channel', 'xiaoice',
       '--to', sessionId || 'default',
       '--message', askText || '',
-      '--thinking', 'low',
+      '--thinking', thinkingLevel,
       '--json'
     ];
 
-    log('INFO', 'Calling OpenClaw CLI', { args, streaming: isStreaming });
+    log('INFO', 'Calling OpenClaw CLI', { args, streaming: isStreaming, thinkingLevel, questionLength: askText.length });
 
     const openclaw = spawn('openclaw', args, {
       env: { ...process.env }
@@ -107,6 +174,17 @@ async function sendToOpenClaw(payload, isStreaming = false, streamCallback = nul
 
       if (code === 0) {
         log('INFO', 'OpenClaw response', { stdout: stdout.substring(0, 200) + '...' });
+
+        // Performance metrics
+        const processingTime = Date.now() - startTime;
+        const cacheHit = stdout.includes('cacheRead');
+        log('INFO', 'Performance metrics', {
+          thinkingLevel,
+          questionLength: askText.length,
+          processingTime,
+          cacheHit
+        });
+
         resolve({ ok: true, response: stdout });
       } else {
         log('ERROR', 'OpenClaw error', { code, stderr });
@@ -305,34 +383,88 @@ async function handleXiaoIceDialogue(req, res) {
       const languageCode = String(payload.languageCode || 'zh');
       const extra = typeof payload.extra === 'object' && payload.extra !== null ? payload.extra : {};
 
-      // 统一处理：返回 XiaoIce 期望的完整 JSON 格式
+      // 根据 isStreaming 选择响应模式
       try {
-        const result = await sendToOpenClaw({ sessionId, askText }, false);
+        if (isStreaming) {
+          // 流式 SSE 响应
+          log('INFO', 'Starting streaming response');
 
-        // 提取回复文本
-        const replyText = extractReplyText(result.response);
+          res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+          });
 
-        // 返回 XiaoIce 期望的完整格式（非流式）
-        const response = {
-          id: generateId(),
-          traceId: traceId,
-          sessionId: sessionId,
-          askText: askText,
-          replyText: replyText,
-          replyType: 'Llm',
-          timestamp: Date.now(),
-          replyPayload: {},
-          extra: { modelName: 'openclaw' }
-        };
+          const result = await sendToOpenClaw({ sessionId, askText }, false);
 
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(response));
+          // 提取回复文本
+          const fullReplyText = extractReplyText(result.response);
 
-        log('INFO', 'Response sent successfully', {
-          sessionId: sessionId,
-          textLength: replyText.length,
-          response: response
-        });
+          // 应用语音优化
+          const voiceOptimizedText = XIAOICE_CONFIG.voiceOptimization
+            ? formatForVoice(fullReplyText)
+            : fullReplyText;
+
+          // 流式发送：只发送一次完整消息
+          const event = {
+            id: generateId(),
+            traceId: traceId,
+            sessionId: sessionId,
+            askText: askText,
+            replyText: voiceOptimizedText,
+            replyType: 'Llm',
+            timestamp: Date.now(),
+            replyPayload: {},
+            extra: { modelName: 'openclaw' }
+          };
+
+          res.write(`data: ${JSON.stringify(event)}\n\n`);
+
+          // 发送结束标记
+          res.write('data: [DONE]\n\n');
+          res.end();
+
+          log('INFO', 'Streaming response completed', {
+            sessionId: sessionId,
+            textLength: voiceOptimizedText.length,
+            voiceOptimized: XIAOICE_CONFIG.voiceOptimization
+          });
+
+        } else {
+          // 非流式 JSON 响应
+          const result = await sendToOpenClaw({ sessionId, askText }, false);
+
+          // 提取回复文本
+          const replyText = extractReplyText(result.response);
+
+          // 应用语音优化
+          const voiceOptimizedText = XIAOICE_CONFIG.voiceOptimization
+            ? formatForVoice(replyText)
+            : replyText;
+
+          // 返回 XiaoIce 期望的完整格式（非流式）
+          const response = {
+            id: generateId(),
+            traceId: traceId,
+            sessionId: sessionId,
+            askText: askText,
+            replyText: voiceOptimizedText,
+            replyType: 'Llm',
+            timestamp: Date.now(),
+            replyPayload: {},
+            extra: { modelName: 'openclaw' }
+          };
+
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify(response));
+
+          log('INFO', 'Response sent successfully', {
+            sessionId: sessionId,
+            textLength: voiceOptimizedText.length,
+            voiceOptimized: XIAOICE_CONFIG.voiceOptimization,
+            response: response
+          });
+        }
 
       } catch (error) {
         log('ERROR', 'Processing error', { error: error.message });
@@ -351,8 +483,17 @@ async function handleXiaoIceDialogue(req, res) {
           extra: { error: error.message }
         };
 
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(errorResponse));
+        // 检查是否已经发送了响应头（流式模式）
+        if (isStreaming && res.headersSent) {
+          // 流式模式下，发送错误事件并结束
+          res.write(`data: ${JSON.stringify(errorResponse)}\n\n`);
+          res.write('data: [DONE]\n\n');
+          res.end();
+        } else if (!res.headersSent) {
+          // 非流式模式或还未发送头部
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify(errorResponse));
+        }
       }
 
     } catch (error) {
