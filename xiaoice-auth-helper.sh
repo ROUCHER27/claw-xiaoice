@@ -5,30 +5,19 @@
 
 set -e
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# 获取脚本目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Configuration
-WEBHOOK_URL="http://localhost:3002/webhooks/xiaoice"
-SECRET_KEY="${XIAOICE_SECRET_KEY:-test-secret}"
-ACCESS_KEY="${XIAOICE_ACCESS_KEY:-test-key}"
-
-# Helper: Generate signature
-generate_signature() {
-  local body=$1
-  local timestamp=$2
-  echo -n "${body}${SECRET_KEY}${timestamp}" | sha512sum | awk '{print $1}'
-}
+# 加载共享库
+source "$SCRIPT_DIR/lib/config.sh"
+source "$SCRIPT_DIR/lib/colors.sh"
+source "$SCRIPT_DIR/lib/output.sh"
+source "$SCRIPT_DIR/lib/common.sh"
 
 # Helper: Send authenticated request
 send_authenticated_request() {
   local body='{"askText":"Hello from auth helper","sessionId":"test-session","stream":false}'
-  local timestamp=$(date +%s%3N)
+  local timestamp=$(get_timestamp)
   local signature=$(generate_signature "$body" "$timestamp")
 
   echo -e "${CYAN}Request Body:${NC}"
@@ -40,7 +29,7 @@ send_authenticated_request() {
   echo "  x-xiaoice-key: $ACCESS_KEY"
   echo ""
 
-  echo -e "${YELLOW}Sending request...${NC}"
+  print_warning "Sending request..."
   local response=$(curl -s -w "\n%{http_code}" -X POST $WEBHOOK_URL \
     -H "Content-Type: application/json" \
     -H "x-xiaoice-timestamp: $timestamp" \
