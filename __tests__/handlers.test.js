@@ -158,6 +158,45 @@ describe('handleXiaoIceDialogue', () => {
       done();
     }, 100);
   });
+
+  it('should return 400 for invalid JSON payload', (done) => {
+    const req = createMockRequest({
+      method: 'POST',
+      body: '{"askText":"hello",'
+    });
+    const res = createMockResponse();
+
+    handleXiaoIceDialogue(req, res, config);
+
+    setTimeout(() => {
+      expect(res.statusCode).toBe(400);
+      expect(JSON.parse(res.body)).toEqual({ error: 'Invalid JSON body' });
+      done();
+    }, 80);
+  });
+
+  it('should return 413 when request body exceeds maxBodySize', (done) => {
+    const tinyLimitConfig = {
+      ...config,
+      maxBodySize: 16
+    };
+    const req = createMockRequest({
+      method: 'POST',
+      body: JSON.stringify({
+        askText: 'this-message-is-intentionally-too-long',
+        sessionId: 'oversize-session'
+      })
+    });
+    const res = createMockResponse();
+
+    handleXiaoIceDialogue(req, res, tinyLimitConfig);
+
+    setTimeout(() => {
+      expect(res.statusCode).toBe(413);
+      expect(JSON.parse(res.body)).toEqual({ error: 'Payload too large' });
+      done();
+    }, 80);
+  });
 });
 
 describe('handleHealthCheck', () => {
