@@ -3,6 +3,14 @@
  */
 
 const { EventEmitter } = require('events');
+const mockSendMessage = jest.fn();
+
+jest.mock('../src/openclaw-client', () => {
+  return jest.fn().mockImplementation(() => ({
+    sendMessage: mockSendMessage
+  }));
+});
+
 const { handleXiaoIceDialogue, handleHealthCheck } = require('../src/handlers');
 
 function createMockRequest(options = {}) {
@@ -74,6 +82,10 @@ describe('handleXiaoIceDialogue', () => {
     sseHeartbeatMs: 1000
   };
 
+  beforeEach(() => {
+    mockSendMessage.mockReset();
+  });
+
   it('returns envelope JSON for empty askText in non-streaming mode', (done) => {
     const req = createMockRequest({
       body: JSON.stringify({
@@ -130,6 +142,40 @@ describe('handleXiaoIceDialogue', () => {
       expect(res.body).not.toContain('[DONE]');
       done();
     }, 100);
+  });
+
+  it('sanitizes streamed reply text for XiaoIce compatibility', (done) => {
+    mockSendMessage.mockResolvedValue({
+      ok: true,
+      response: JSON.stringify({
+        result: {
+          payloads: [{ text: '你好😄\n\n第二句\u0007' }]
+        }
+      })
+    });
+
+    const req = createMockRequest({
+      headers: { accept: 'text/event-stream' },
+      body: JSON.stringify({
+        askText: '测试文本清洗',
+        sessionId: 'test-sanitize-stream',
+        traceId: 'trace-sanitize-stream'
+      })
+    });
+    const res = createMockResponse();
+
+    handleXiaoIceDialogue(req, res, config);
+
+    setTimeout(() => {
+      expect(res.statusCode).toBe(200);
+      const dataLines = parseSseDataLines(res.body);
+      expect(dataLines.length).toBe(1);
+
+      const event = JSON.parse(dataLines[0]);
+      expect(event.replyText).toBe('你好 第二句');
+      expect(event.replyPayload).toBeNull();
+      done();
+    }, 150);
   });
 
   it('rejects non-POST requests', (done) => {

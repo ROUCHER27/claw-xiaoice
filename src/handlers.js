@@ -3,6 +3,7 @@
  * Handles HTTP request processing for XiaoIce webhook
  */
 
+const crypto = require('crypto');
 const { verifySignature } = require('./auth');
 const { extractReplyText } = require('./response-parser');
 const OpenClawClient = require('./openclaw-client');
@@ -10,6 +11,8 @@ const OpenClawClient = require('./openclaw-client');
 const DEFAULT_SESSION_ID = 'default';
 const DEFAULT_QUEUE_LIMIT = 20;
 const DEFAULT_HEARTBEAT_MS = 0;
+const DEFAULT_REPLY_TEXT = '处理请求时出错';
+const MAX_REPLY_TEXT_LENGTH = 500;
 const sessionPipelines = new Map();
 
 /**
@@ -31,7 +34,44 @@ function log(level, message, data = null) {
  * @returns {string} Unique ID
  */
 function generateId() {
-  return `xiaoice-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  if (typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `xiaoice-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
+/**
+ * Sanitize reply text for XiaoIce compatibility.
+ * - strips ANSI/control chars and emoji
+ * - normalizes line breaks to single spaces
+ * - bounds text length
+ * @param {*} rawText - Raw reply text
+ * @returns {string}
+ */
+function sanitizeReplyText(rawText) {
+  let text = typeof rawText === 'string'
+    ? rawText
+    : (rawText == null ? '' : String(rawText));
+
+  text = text
+    .replace(/\u001b\[[0-9;]*m/g, '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    .replace(/\p{Extended_Pictographic}/gu, '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!text) {
+    return DEFAULT_REPLY_TEXT;
+  }
+
+  if (text.length > MAX_REPLY_TEXT_LENGTH) {
+    return `${text.slice(0, MAX_REPLY_TEXT_LENGTH)}...`;
+  }
+
+  return text;
 }
 
 /**
@@ -44,22 +84,24 @@ function createReplyEnvelope(input) {
     traceId = '',
     sessionId = '',
     askText = '',
-    replyText = '处理请求时出错',
+    replyText = DEFAULT_REPLY_TEXT,
     replyType = 'Llm',
-    replyPayload = {},
+    replyPayload = null,
     isFinal = true,
     extra = { modelName: 'openclaw' }
   } = input;
+
+  const normalizedReplyPayload = replyPayload == null ? null : replyPayload;
 
   return {
     id: generateId(),
     traceId,
     sessionId,
     askText,
-    replyText,
+    replyText: sanitizeReplyText(replyText),
     replyType,
     timestamp: Date.now(),
-    replyPayload,
+    replyPayload: normalizedReplyPayload,
     extra,
     isFinal
   };
