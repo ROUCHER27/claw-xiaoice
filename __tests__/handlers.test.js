@@ -2,20 +2,20 @@
  * Handlers Module Tests
  */
 
-const { handleXiaoIceDialogue, handleHealthCheck } = require('../src/handlers');
 const { EventEmitter } = require('events');
+const { handleXiaoIceDialogue, handleHealthCheck } = require('../src/handlers');
 
-/**
- * Create mock request object
- */
 function createMockRequest(options = {}) {
   const req = new EventEmitter();
   req.method = options.method || 'POST';
   req.url = options.url || '/webhooks/xiaoice';
   req.headers = options.headers || {};
+  req.destroyed = false;
+  req.destroy = jest.fn(() => {
+    req.destroyed = true;
+  });
 
-  // Simulate request body
-  if (options.body) {
+  if (options.body !== undefined) {
     process.nextTick(() => {
       req.emit('data', Buffer.from(options.body));
       req.emit('end');
@@ -25,70 +25,88 @@ function createMockRequest(options = {}) {
   return req;
 }
 
-/**
- * Create mock response object
- */
 function createMockResponse() {
-  const res = {
-    statusCode: null,
-    headers: {},
-    body: '',
-    writeHead(code, headers) {
-      this.statusCode = code;
-      this.headers = headers || {};
-    },
-    write(chunk) {
-      this.body += chunk.toString();
-    },
-    end(data) {
-      if (data) {
-        this.body += data.toString();
-      }
-      this.finished = true;
-    },
-    destroy() {
-      this.destroyed = true;
-    }
+  const res = new EventEmitter();
+  res.statusCode = null;
+  res.headers = {};
+  res.body = '';
+  res.writableEnded = false;
+  res.destroyed = false;
+  res.headersSent = false;
+
+  res.writeHead = function writeHead(code, headers) {
+    this.statusCode = code;
+    this.headers = headers || {};
+    this.headersSent = true;
   };
+  res.write = function write(chunk) {
+    this.body += chunk.toString();
+  };
+  res.end = function end(data) {
+    if (data) {
+      this.body += data.toString();
+    }
+    this.writableEnded = true;
+    this.emit('close');
+  };
+  res.destroy = function destroy() {
+    this.destroyed = true;
+    this.emit('close');
+  };
+
   return res;
+}
+
+function parseSseDataLines(body) {
+  return body
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => line.replace(/^data:\s*/, ''));
 }
 
 describe('handleXiaoIceDialogue', () => {
   const config = {
     authRequired: false,
     maxBodySize: 1024 * 1024,
-    timeout: 25000
+    timeout: 25000,
+    sessionQueueLimit: 20,
+    sseHeartbeatMs: 1000
   };
 
-  it('should handle empty askText gracefully (non-streaming)', (done) => {
+  it('returns envelope JSON for empty askText in non-streaming mode', (done) => {
     const req = createMockRequest({
-      method: 'POST',
-      headers: {},
       body: JSON.stringify({
         askText: '',
-        sessionId: 'test-session-empty'
+        sessionId: 'test-session-empty',
+        traceId: 'trace-empty'
       })
     });
     const res = createMockResponse();
 
     handleXiaoIceDialogue(req, res, config);
 
-    // Wait for async processing
     setTimeout(() => {
       expect(res.statusCode).toBe(200);
-      expect(res.headers['Content-Type']).toBe('text/plain; charset=utf-8');
-      expect(res.body).toBe('请说点什么吧～');
+      expect(res.headers['Content-Type']).toBe('application/json; charset=utf-8');
+
+      const body = JSON.parse(res.body);
+      expect(body.replyType).toBe('Fallback');
+      expect(body.replyText).toBe('请说点什么吧～');
+      expect(body.traceId).toBe('trace-empty');
+      expect(body.sessionId).toBe('test-session-empty');
+      expect(body.isFinal).toBe(true);
       done();
     }, 100);
   });
 
-  it('should handle whitespace-only askText gracefully (non-streaming)', (done) => {
+  it('returns SSE envelope for empty askText in streaming mode', (done) => {
     const req = createMockRequest({
-      method: 'POST',
-      headers: {},
+      headers: { accept: 'text/event-stream' },
       body: JSON.stringify({
-        askText: '   ',
-        sessionId: 'test-session-whitespace'
+        askText: '  ',
+        sessionId: 'test-session-empty-stream',
+        traceId: 'trace-empty-stream'
       })
     });
     const res = createMockResponse();
@@ -97,35 +115,22 @@ describe('handleXiaoIceDialogue', () => {
 
     setTimeout(() => {
       expect(res.statusCode).toBe(200);
-      expect(res.body).toBe('请说点什么吧～');
+      expect(res.headers['Content-Type']).toBe('text/event-stream; charset=utf-8');
+
+      const dataLines = parseSseDataLines(res.body);
+      expect(dataLines.length).toBe(1);
+
+      const event = JSON.parse(dataLines[0]);
+      expect(event.replyType).toBe('Fallback');
+      expect(event.replyText).toBe('请说点什么吧～');
+      expect(event.traceId).toBe('trace-empty-stream');
+      expect(event.isFinal).toBe(true);
+      expect(res.body).not.toContain('[DONE]');
       done();
     }, 100);
   });
 
-  it('should handle empty askText gracefully (streaming)', (done) => {
-    const req = createMockRequest({
-      method: 'POST',
-      headers: {
-        'accept': 'text/event-stream'
-      },
-      body: JSON.stringify({
-        askText: '',
-        sessionId: 'test-session-empty-stream'
-      })
-    });
-    const res = createMockResponse();
-
-    handleXiaoIceDialogue(req, res, config);
-
-    setTimeout(() => {
-      expect(res.statusCode).toBe(200);
-      expect(res.headers['Content-Type']).toBe('text/plain; charset=utf-8');
-      expect(res.body).toBe('请说点什么吧～');
-      done();
-    }, 100);
-  });
-
-  it('should reject non-POST requests', (done) => {
+  it('rejects non-POST requests', (done) => {
     const req = createMockRequest({
       method: 'GET',
       body: ''
@@ -141,27 +146,8 @@ describe('handleXiaoIceDialogue', () => {
     }, 50);
   });
 
-  it('should reject missing askText field', (done) => {
+  it('returns 400 for invalid JSON payload', (done) => {
     const req = createMockRequest({
-      method: 'POST',
-      body: JSON.stringify({
-        sessionId: 'test-session-no-asktext'
-      })
-    });
-    const res = createMockResponse();
-
-    handleXiaoIceDialogue(req, res, config);
-
-    setTimeout(() => {
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toBe('请说点什么吧～');
-      done();
-    }, 100);
-  });
-
-  it('should return 400 for invalid JSON payload', (done) => {
-    const req = createMockRequest({
-      method: 'POST',
       body: '{"askText":"hello",'
     });
     const res = createMockResponse();
@@ -175,13 +161,12 @@ describe('handleXiaoIceDialogue', () => {
     }, 80);
   });
 
-  it('should return 413 when request body exceeds maxBodySize', (done) => {
+  it('returns 413 and destroys request when body is too large', (done) => {
     const tinyLimitConfig = {
       ...config,
       maxBodySize: 16
     };
     const req = createMockRequest({
-      method: 'POST',
       body: JSON.stringify({
         askText: 'this-message-is-intentionally-too-long',
         sessionId: 'oversize-session'
@@ -194,13 +179,14 @@ describe('handleXiaoIceDialogue', () => {
     setTimeout(() => {
       expect(res.statusCode).toBe(413);
       expect(JSON.parse(res.body)).toEqual({ error: 'Payload too large' });
+      expect(req.destroy).toHaveBeenCalled();
       done();
     }, 80);
   });
 });
 
 describe('handleHealthCheck', () => {
-  it('should return health status', () => {
+  it('returns health status JSON', () => {
     const req = {};
     const res = createMockResponse();
 

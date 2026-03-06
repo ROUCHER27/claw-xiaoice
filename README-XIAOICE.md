@@ -47,8 +47,8 @@ XiaoIce Platform → Webhook Proxy (Port 3002) → OpenClaw CLI → OpenClaw Gat
 
 1. **Server-Sent Events (SSE)**
    - Proper SSE headers: `text/event-stream`, `no-cache`, `keep-alive`
-   - Chunk format: `data: {json}\n\n`
-   - Completion marker: `data: [DONE]\n\n`
+   - Chunk format: `event: message\ndata: {json}\n\n`
+   - Final response is marked inside JSON with `isFinal: true`
 
 2. **Non-Streaming Mode**
    - Backward compatible with traditional request/response
@@ -86,12 +86,13 @@ XiaoIce Platform → Webhook Proxy (Port 3002) → OpenClaw CLI → OpenClaw Gat
   "sessionId": "session-001",
   "askText": "用户输入文本",
   "replyText": "AI回复内容",
-  "replyType": "text",
+  "replyType": "Llm",
   "timestamp": 1709366400000,
   "replyPayload": {},
   "extra": {
     "modelName": "openclaw"
-  }
+  },
+  "isFinal": true
 }
 ```
 

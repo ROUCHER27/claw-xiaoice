@@ -39,11 +39,13 @@ function sendStreamingRequest(payload, config) {
       statusCode: null,
       headers: {},
       body: '',
+      headersSent: false,
       writableEnded: false,
       destroyed: false,
       writeHead(code, headers) {
         this.statusCode = code;
         this.headers = headers || {};
+        this.headersSent = true;
       },
       write(chunk) {
         this.body += chunk.toString();
@@ -69,7 +71,9 @@ describe('session queue', () => {
   const config = {
     authRequired: false,
     maxBodySize: 1024 * 1024,
-    timeout: 5000
+    timeout: 5000,
+    sessionQueueLimit: 20,
+    sseHeartbeatMs: 1000
   };
 
   beforeEach(() => {
@@ -104,8 +108,10 @@ describe('session queue', () => {
     expect(res2.statusCode).toBe(200);
     expect(res1.body).toContain('"replyText":"ok-first"');
     expect(res2.body).toContain('"replyText":"ok-second"');
-    expect(res1.body).toContain('data: [DONE]');
-    expect(res2.body).toContain('data: [DONE]');
+    expect(res1.body).toContain('"isFinal":true');
+    expect(res2.body).toContain('"isFinal":true');
+    expect(res1.body).not.toContain('[DONE]');
+    expect(res2.body).not.toContain('[DONE]');
   });
 
   it('keeps processing after a timeout-like failure in the same session', async () => {
@@ -162,7 +168,7 @@ describe('session queue', () => {
     expect(res2.statusCode).toBe(200);
   });
 
-  it('reorders waiting requests by latest-first within the same session', async () => {
+  it('processes waiting requests in FIFO order within the same session', async () => {
     const executionOrder = [];
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -191,7 +197,7 @@ describe('session queue', () => {
 
       const [res1, res2, res3] = await Promise.all([r1, r2, r3]);
 
-      expect(executionOrder).toEqual(['first', 'third', 'second']);
+      expect(executionOrder).toEqual(['first', 'second', 'third']);
       expect(res1.statusCode).toBe(200);
       expect(res2.statusCode).toBe(200);
       expect(res3.statusCode).toBe(200);
@@ -207,10 +213,48 @@ describe('session queue', () => {
       const secondQueueLog = queueAcquireLogs.find((entry) => entry.traceId === 't2');
       const thirdQueueLog = queueAcquireLogs.find((entry) => entry.traceId === 't3');
 
+      expect(secondQueueLog.queuePosition).toBe(2);
       expect(thirdQueueLog.queuePosition).toBe(2);
-      expect(secondQueueLog.queuePosition).toBe(3);
     } finally {
       logSpy.mockRestore();
     }
+  });
+
+  it('returns fallback when session queue is full', async () => {
+    const limitedConfig = {
+      ...config,
+      sessionQueueLimit: 2
+    };
+
+    mockSendMessage.mockImplementation(async ({ askText }) => {
+      if (askText === 'first') {
+        await wait(80);
+      } else {
+        await wait(5);
+      }
+
+      return {
+        ok: true,
+        response: JSON.stringify({
+          result: { payloads: [{ text: `ok-${askText}` }] }
+        })
+      };
+    });
+
+    const sessionId = 'queue-full-session';
+    const r1 = sendStreamingRequest({ askText: 'first', sessionId, traceId: 'q1' }, limitedConfig);
+    await wait(5);
+    const r2 = sendStreamingRequest({ askText: 'second', sessionId, traceId: 'q2' }, limitedConfig);
+    await wait(5);
+    const r3 = sendStreamingRequest({ askText: 'third', sessionId, traceId: 'q3' }, limitedConfig);
+
+    const [res1, res2, res3] = await Promise.all([r1, r2, r3]);
+    expect(res1.statusCode).toBe(200);
+    expect(res2.statusCode).toBe(200);
+    expect(res3.statusCode).toBe(200);
+    expect(res3.body).toContain('"replyType":"Fallback"');
+    expect(res3.body).toContain('"error":"SESSION_QUEUE_FULL"');
+    expect(res3.body).toContain('"isFinal":true');
+    expect(res3.body).not.toContain('[DONE]');
   });
 });

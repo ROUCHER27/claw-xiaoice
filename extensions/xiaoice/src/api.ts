@@ -1,5 +1,5 @@
 import type { ResolvedXiaoiceAccount } from "./types.js";
-import type { XiaoiceOutboundMessage, XiaoiceStreamEvent, XiaoiceStreamHandler } from "./types.js";
+import type { XiaoiceOutboundMessage, XiaoiceStreamEvent } from "./types.js";
 
 /**
  * 发送消息（非流式）
@@ -62,7 +62,13 @@ export async function sendXiaoiceMessageStream({
   conversationId: string;
   text: string;
   onChunk?: (event: XiaoiceStreamEvent) => void | Promise<void>;
-}): Promise<{ ok: boolean; error?: string; stream?: ReadableStream<Uint8Array> }> {
+}): Promise<{
+  ok: boolean;
+  error?: string;
+  eventCount?: number;
+  doneReceived?: boolean;
+  completionReason?: "done-marker" | "is-final" | "eof";
+}> {
   const { config } = account;
   
   if (!config.apiBaseUrl || !config.apiKey) {
@@ -91,43 +97,97 @@ export async function sendXiaoiceMessageStream({
     }
     
     const stream = response.body;
-    
+
     if (!stream) {
       return { ok: false, error: "No stream returned" };
     }
-    
-    // 创建转换流处理 SSE
-    const transformer = new TransformStream<Uint8Array, XiaoiceStreamEvent>({
-      transform(chunk, controller) {
-        const decoder = new TextDecoder();
-        const text = decoder.decode(chunk, { stream: true });
-        
-        // 解析 SSE 格式
-        // data: {"id":"...","replyText":"..."}
-        const lines = text.split("\n");
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data && data !== "[DONE]") {
-              try {
-                const event = JSON.parse(data) as XiaoiceStreamEvent;
-                // 调用回调
-                if (onChunk) {
-                  onChunk(event);
-                }
-                controller.enqueue(event);
-              } catch (e) {
-                // 忽略解析错误
-              }
-            }
-          }
+
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let eventCount = 0;
+    let streamCompleted = false;
+    let completionReason: "done-marker" | "is-final" | "eof" | undefined;
+
+    const processEventBlock = async (rawBlock: string): Promise<void> => {
+      const lines = rawBlock.split("\n");
+      const dataLines: string[] = [];
+
+      for (const line of lines) {
+        if (line.startsWith("data:")) {
+          dataLines.push(line.slice(5).trimStart());
         }
-      },
-    });
-    
-    return { 
-      ok: true, 
-      stream: stream.pipeThrough(transformer) 
+      }
+
+      if (dataLines.length === 0) {
+        return;
+      }
+
+      const data = dataLines.join("\n").trim();
+      if (!data) {
+        return;
+      }
+
+      if (data === "[DONE]") {
+        streamCompleted = true;
+        completionReason = "done-marker";
+        return;
+      }
+
+      try {
+        const event = JSON.parse(data) as XiaoiceStreamEvent;
+        eventCount += 1;
+        if (onChunk) {
+          await onChunk(event);
+        }
+        if (event.isFinal === true) {
+          streamCompleted = true;
+          completionReason = "is-final";
+        }
+      } catch (error) {
+        // Ignore malformed SSE payloads from upstream.
+      }
+    };
+
+    const drainBuffer = async (): Promise<void> => {
+      let normalized = buffer.replace(/\r\n/g, "\n");
+      let boundaryIndex = normalized.indexOf("\n\n");
+
+      while (boundaryIndex !== -1) {
+        const rawBlock = normalized.slice(0, boundaryIndex);
+        normalized = normalized.slice(boundaryIndex + 2);
+        await processEventBlock(rawBlock);
+        boundaryIndex = normalized.indexOf("\n\n");
+      }
+
+      buffer = normalized;
+    };
+
+    while (!streamCompleted) {
+      const { value, done } = await reader.read();
+      if (done) {
+        completionReason = completionReason || "eof";
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      await drainBuffer();
+    }
+
+    buffer += decoder.decode();
+    await drainBuffer();
+
+    try {
+      await reader.cancel();
+    } catch (error) {
+      // Ignore reader cancel races.
+    }
+
+    return {
+      ok: true,
+      eventCount,
+      doneReceived: streamCompleted,
+      completionReason,
     };
   } catch (error) {
     return { 

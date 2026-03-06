@@ -1,10 +1,8 @@
 import {
   buildChannelConfigSchema,
-  DEFAULT_ACCOUNT_ID,
   getChatChannelMeta,
 } from "openclaw/plugin-sdk";
 import type { ChannelPlugin } from "openclaw/plugin-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk";
 import {
   listXiaoiceAccountIds,
   resolveXiaoiceAccount,
@@ -59,19 +57,28 @@ export const xiaoicePlugin: ChannelPlugin<ResolvedXiaoiceAccount> = {
       
       // 如果需要流式返回
       if (stream) {
+        const encoder = new TextEncoder();
+
         const result = await sendXiaoiceMessageStream({
           account,
           conversationId,
           text,
           onChunk: async (event) => {
-            // 将流式事件写入响应
-            const data = `data: ${JSON.stringify(event)}\n\n`;
-            await stream.writer.write(new TextEncoder().encode(data));
+            const data = `event: message\ndata: ${JSON.stringify(event)}\n\n`;
+            await stream.writer.write(encoder.encode(data));
           },
         });
-        
+
         if (!result.ok) {
-          throw new Error(result.error);
+          const errorMessage = result.error || "XiaoIce streaming request failed";
+          if (typeof stream.writer.abort === "function") {
+            await stream.writer.abort(new Error(errorMessage));
+          }
+          throw new Error(errorMessage);
+        }
+
+        if (typeof stream.writer.close === "function") {
+          await stream.writer.close();
         }
         
         return {

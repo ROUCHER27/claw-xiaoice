@@ -45,7 +45,8 @@ export type XiaoiceStreamEvent = {
   replyType: "FAQ" | "Doc" | "Llm" | "Fallback";
   timestamp: number;
   replyPayload?: Record<string, unknown>;
-  extra?: Record<string, string>;
+  extra?: Record<string, unknown>;
+  isFinal?: boolean;
 };
 
 // SSE 流式回调类型
