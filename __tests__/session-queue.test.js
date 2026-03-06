@@ -110,6 +110,10 @@ describe('session queue', () => {
     expect(res2.body).toContain('"replyText":"ok-second"');
     expect(res1.body).toContain('"isFinal":true');
     expect(res2.body).toContain('"isFinal":true');
+    expect(res1.body).not.toContain('event:');
+    expect(res2.body).not.toContain('event:');
+    expect(res1.body).not.toContain(': keep-alive');
+    expect(res2.body).not.toContain(': keep-alive');
     expect(res1.body).not.toContain('[DONE]');
     expect(res2.body).not.toContain('[DONE]');
   });
@@ -255,6 +259,8 @@ describe('session queue', () => {
     expect(res3.body).toContain('"replyType":"Fallback"');
     expect(res3.body).toContain('"error":"SESSION_QUEUE_FULL"');
     expect(res3.body).toContain('"isFinal":true');
+    expect(res3.body).not.toContain('event:');
+    expect(res3.body).not.toContain(': keep-alive');
     expect(res3.body).not.toContain('[DONE]');
   });
 });

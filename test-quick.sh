@@ -73,7 +73,10 @@ STREAM_RESPONSE=$(curl -s -N -X POST "$WEBHOOK_URL" \
   -d "$BODY" \
   --max-time 45)
 
-if echo "$STREAM_RESPONSE" | grep -q '"isFinal":true' && ! echo "$STREAM_RESPONSE" | grep -q '\[DONE\]'; then
+if echo "$STREAM_RESPONSE" | grep -q '"isFinal":true' \
+  && ! echo "$STREAM_RESPONSE" | grep -q '\[DONE\]' \
+  && ! echo "$STREAM_RESPONSE" | grep -q '^event:' \
+  && ! echo "$STREAM_RESPONSE" | grep -q '^: keep-alive'; then
     print_success "Streaming protocol matches XiaoIce SSE contract"
     echo "  Response preview:"
     echo "$STREAM_RESPONSE" | head -c 220

@@ -9,7 +9,7 @@ const OpenClawClient = require('./openclaw-client');
 
 const DEFAULT_SESSION_ID = 'default';
 const DEFAULT_QUEUE_LIMIT = 20;
-const DEFAULT_HEARTBEAT_MS = 15000;
+const DEFAULT_HEARTBEAT_MS = 0;
 const sessionPipelines = new Map();
 
 /**
@@ -90,7 +90,7 @@ function writeSseHeaders(res) {
   }
 
   res.writeHead(200, {
-    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
   });
@@ -106,7 +106,8 @@ function sendSseEnvelope(res, event) {
     return;
   }
 
-  res.write(`event: message\ndata: ${JSON.stringify(event)}\n\n`);
+  // Keep XiaoIce compatibility strict: data-only SSE payload.
+  res.write(`data: ${JSON.stringify(event)}\n\n`);
   res.end();
 }
 
@@ -117,9 +118,12 @@ function sendSseEnvelope(res, event) {
  * @returns {Function} Stop heartbeat function
  */
 function startSseHeartbeat(res, heartbeatMs) {
-  const intervalMs = Number.isFinite(heartbeatMs) && heartbeatMs > 0
-    ? heartbeatMs
-    : DEFAULT_HEARTBEAT_MS;
+  const configuredMs = Number.isFinite(heartbeatMs) ? heartbeatMs : DEFAULT_HEARTBEAT_MS;
+  if (configuredMs <= 0) {
+    return () => {};
+  }
+
+  const intervalMs = configuredMs;
 
   const timer = setInterval(() => {
     if (res.writableEnded || res.destroyed) {

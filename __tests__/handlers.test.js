@@ -115,7 +115,7 @@ describe('handleXiaoIceDialogue', () => {
 
     setTimeout(() => {
       expect(res.statusCode).toBe(200);
-      expect(res.headers['Content-Type']).toBe('text/event-stream; charset=utf-8');
+      expect(res.headers['Content-Type']).toBe('text/event-stream');
 
       const dataLines = parseSseDataLines(res.body);
       expect(dataLines.length).toBe(1);
@@ -125,6 +125,8 @@ describe('handleXiaoIceDialogue', () => {
       expect(event.replyText).toBe('请说点什么吧～');
       expect(event.traceId).toBe('trace-empty-stream');
       expect(event.isFinal).toBe(true);
+      expect(res.body).not.toContain('event:');
+      expect(res.body).not.toContain(': keep-alive');
       expect(res.body).not.toContain('[DONE]');
       done();
     }, 100);
