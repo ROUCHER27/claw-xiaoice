@@ -59,7 +59,7 @@ start_webhook() {
   export XIAOICE_ACCESS_KEY=$ACCESS_KEY
   export XIAOICE_SECRET_KEY=$SECRET_KEY
 
-  node webhook-proxy.js > /tmp/webhook-test.log 2>&1 &
+  node webhook-proxy-new.js > /tmp/webhook-test.log 2>&1 &
   WEBHOOK_PID=$!
 
   # Wait for webhook to start

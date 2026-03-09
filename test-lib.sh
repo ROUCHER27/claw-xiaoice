@@ -240,7 +240,7 @@ assert_equals "http://localhost:3002/webhooks/xiaoice" "$WEBHOOK_URL" "WEBHOOK_U
 assert_equals "3002" "$WEBHOOK_PORT" "WEBHOOK_PORT 默认值正确"
 assert_equals "test-key" "$ACCESS_KEY" "ACCESS_KEY 默认值正确"
 assert_equals "test-secret" "$SECRET_KEY" "SECRET_KEY 默认值正确"
-assert_equals "18000" "$TIMEOUT" "TIMEOUT 默认值正确"
+assert_equals "30000" "$TIMEOUT" "TIMEOUT 默认值正确"
 
 echo ""
 

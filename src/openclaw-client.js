@@ -34,8 +34,9 @@ class OpenClawClient {
 
     return new Promise((resolve, reject) => {
       const { sessionId, askText } = payload;
-      let completed = false;
+      let settled = false;
       let timeoutHandle = null;
+      let forceKillHandle = null;
 
       // Build OpenClaw agent command
       const args = [
@@ -60,6 +61,10 @@ class OpenClawClient {
           clearTimeout(timeoutHandle);
           timeoutHandle = null;
         }
+        if (forceKillHandle) {
+          clearTimeout(forceKillHandle);
+          forceKillHandle = null;
+        }
         openclaw.stdout.removeAllListeners();
         openclaw.stderr.removeAllListeners();
         openclaw.removeAllListeners();
@@ -67,11 +72,24 @@ class OpenClawClient {
 
       // Set timeout
       timeoutHandle = setTimeout(() => {
-        if (completed) return;
-        completed = true;
+        if (settled) return;
+        settled = true;
 
-        openclaw.kill('SIGTERM');
-        cleanup();
+        try {
+          openclaw.kill('SIGTERM');
+        } catch (error) {
+          // Ignore kill race errors.
+        }
+
+        // If process ignores SIGTERM, force-kill shortly after.
+        forceKillHandle = setTimeout(() => {
+          try {
+            openclaw.kill('SIGKILL');
+          } catch (error) {
+            // Ignore kill race errors.
+          }
+        }, 1500);
+
         reject(new Error('TIMEOUT'));
       }, this.config.timeout);
 
@@ -90,10 +108,9 @@ class OpenClawClient {
       });
 
       openclaw.on('close', (code) => {
-        if (completed) return;
-        completed = true;
-
         cleanup();
+        if (settled) return;
+        settled = true;
 
         if (code === 0) {
           resolve({ ok: true, response: stdout });
@@ -103,10 +120,9 @@ class OpenClawClient {
       });
 
       openclaw.on('error', (error) => {
-        if (completed) return;
-        completed = true;
-
         cleanup();
+        if (settled) return;
+        settled = true;
         reject(error);
       });
     });

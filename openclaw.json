@@ -66,6 +66,26 @@
       },
       "xiaoice": {
         "enabled": true
+      },
+      "mcp-integration": {
+        "enabled": true,
+        "config": {
+          "enabled": true,
+          "servers": {
+            "gmail": {
+              "enabled": true,
+              "transport": "stdio",
+              "command": "node",
+              "args": [
+                "/home/yirongbest/.openclaw/node_modules/@gongrzhe/server-gmail-autoauth-mcp/dist/index.js"
+              ],
+              "env": {
+                "GMAIL_OAUTH_PATH": "/home/yirongbest/.openclaw/credentials/gmail-mcp/gcp-oauth.keys.json",
+                "GMAIL_CREDENTIALS_PATH": "/home/yirongbest/.openclaw/credentials/gmail-mcp/credentials.json"
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -96,6 +116,23 @@
             },
             "contextWindow": 200000,
             "maxTokens": 8192
+          },
+          {
+            "id": "claude-haiku-4.5",
+            "name": "Claude Haiku 4.5",
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0.8,
+              "output": 4,
+              "cacheRead": 0.08,
+              "cacheWrite": 1
+            },
+            "contextWindow": 200000,
+            "maxTokens": 8192
           }
         ]
       }
@@ -104,7 +141,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "yunyi-claude/claude-sonnet-4-6"
+        "primary": "minimax-cn/MiniMax-M2.5-highspeed"
       }
     }
   }

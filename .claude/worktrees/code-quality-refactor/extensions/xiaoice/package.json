@@ -1,0 +1,6 @@
+{
+  "name": "xiaoice",
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  }
+}

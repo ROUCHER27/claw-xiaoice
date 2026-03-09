@@ -1,4 +1,5 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from './http-transport.js';
 
 /**
@@ -14,19 +15,42 @@ class MCPManager {
 
   async connectServer(name, config) {
     try {
-      const url = config.url;
-      let safeUrl = url;
-      try {
-        const u = new URL(url);
-        u.password = '';
-        u.username = '';
-        safeUrl = u.toString();
-      } catch (e) {
-        // invalid url, just keep it as is or mask it
-      }
-      this.logger.info(`[MCP] Connecting to ${name} at ${safeUrl}`);
+      const transportType = config.transport || (config.command ? 'stdio' : 'http');
+      let transport;
 
-      const transport = new StreamableHTTPClientTransport(url);
+      if (transportType === 'stdio') {
+        if (!config.command) {
+          throw new Error('Missing "command" for stdio transport');
+        }
+
+        this.logger.info(`[MCP] Connecting to ${name} via stdio (${config.command})`);
+        transport = new StdioClientTransport({
+          command: config.command,
+          args: Array.isArray(config.args) ? config.args : [],
+          env: config.env && typeof config.env === 'object' ? config.env : undefined,
+          cwd: config.cwd,
+        });
+      } else if (transportType === 'http') {
+        if (!config.url) {
+          throw new Error('Missing "url" for http transport');
+        }
+
+        const url = config.url;
+        let safeUrl = url;
+        try {
+          const u = new URL(url);
+          u.password = '';
+          u.username = '';
+          safeUrl = u.toString();
+        } catch (e) {
+          // invalid url, just keep it as is or mask it
+        }
+
+        this.logger.info(`[MCP] Connecting to ${name} at ${safeUrl}`);
+        transport = new StreamableHTTPClientTransport(url);
+      } else {
+        throw new Error(`Unsupported transport "${transportType}"`);
+      }
 
       const client = new Client(
         { name: `openclaw-${name}`, version: '0.1.0' },
@@ -37,7 +61,7 @@ class MCPManager {
 
       const { tools } = await client.listTools();
 
-      this.clients.set(name, { client, transport });
+      this.clients.set(name, { client, transport, transportType });
 
       tools.forEach(tool => {
         this.tools.set(`${name}:${tool.name}`, {
@@ -110,12 +134,14 @@ export default function register(api) {
       const servers = pluginConfig.servers || {};
 
       for (const [name, config] of Object.entries(servers)) {
-        if (config.enabled !== false && config.url) {
-          try {
-            await mcpManager.connectServer(name, config);
-          } catch (error) {
-            api.logger.error(`[MCP] Failed to initialize ${name}: ${error.message}`);
-          }
+        if (config.enabled === false) {
+          continue;
+        }
+
+        try {
+          await mcpManager.connectServer(name, config);
+        } catch (error) {
+          api.logger.error(`[MCP] Failed to initialize ${name}: ${error.message}`);
         }
       }
 

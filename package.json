@@ -2,14 +2,18 @@
   "name": "xiaoice-webhook-proxy",
   "version": "1.0.0",
   "description": "XiaoIce Webhook Proxy for OpenClaw",
-  "main": "webhook-proxy.js",
+  "main": "webhook-proxy-new.js",
   "scripts": {
-    "start": "node webhook-proxy.js",
+    "start": "node webhook-proxy-new.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
-  "keywords": ["xiaoice", "webhook", "openclaw"],
+  "keywords": [
+    "xiaoice",
+    "webhook",
+    "openclaw"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -21,7 +25,7 @@
     "collectCoverageFrom": [
       "src/**/*.js"
     ],
-    "coverageThresholds": {
+    "coverageThreshold": {
       "global": {
         "branches": 80,
         "functions": 80,
@@ -29,8 +33,18 @@
         "statements": 80
       }
     },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/\\.claude/"
+    ],
     "testMatch": [
       "**/__tests__/**/*.test.js"
     ]
+  },
+  "dependencies": {
+    "@gongrzhe/server-gmail-autoauth-mcp": "1.1.11",
+    "@modelcontextprotocol/sdk": "1.25.3",
+    "eventsource": "4.1.0",
+    "eventsource-parser": "3.0.6"
   }
 }

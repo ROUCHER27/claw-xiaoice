@@ -3,10 +3,10 @@
   "jobs": [
     {
       "id": "7ee1113f-d51e-4f81-921e-9bf429493df3",
-      "name": "dailybit-digest",
+      "name": "小冰科技日报",
       "enabled": true,
       "createdAtMs": 1772470664990,
-      "updatedAtMs": 1772470664990,
+      "updatedAtMs": 1773025264840,
       "schedule": {
         "kind": "cron",
         "expr": "0 11 * * *",
@@ -20,10 +20,18 @@
       },
       "delivery": {
         "mode": "announce",
-        "channel": "last"
+        "channel": "feishu",
+        "to": "ou_1a037689464e44e8651500ab98ebf019"
       },
       "state": {
-        "nextRunAtMs": 1772506800000
+        "nextRunAtMs": 1773111600000,
+        "lastRunAtMs": 1773025200009,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 64831,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 0,
+        "lastDelivered": false
       }
     }
   ]

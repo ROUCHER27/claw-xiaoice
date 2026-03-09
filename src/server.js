@@ -5,6 +5,11 @@
 
 const http = require('http');
 const { handleXiaoIceDialogue, handleHealthCheck } = require('./handlers');
+const {
+  handleDashboardPage,
+  handleDashboardStatus,
+  handleDashboardLogs
+} = require('./dashboard');
 
 /**
  * Create HTTP server with routing
@@ -13,14 +18,37 @@ const { handleXiaoIceDialogue, handleHealthCheck } = require('./handlers');
  */
 function createServer(config) {
   const server = http.createServer((req, res) => {
+    const url = new URL(req.url, 'http://localhost');
+
     // Route: Health check
-    if (req.url === '/health' && req.method === 'GET') {
+    if (url.pathname === '/health' && req.method === 'GET') {
       handleHealthCheck(req, res);
       return;
     }
 
+    // Route: Local dashboard
+    if (url.pathname === '/dashboard' && req.method === 'GET') {
+      handleDashboardPage(req, res);
+      return;
+    }
+
+    // Route: Dashboard status API
+    if (url.pathname === '/api/dashboard/status' && req.method === 'GET') {
+      handleDashboardStatus(req, res, config).catch((error) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
+      });
+      return;
+    }
+
+    // Route: Dashboard logs API
+    if (url.pathname === '/api/dashboard/logs' && req.method === 'GET') {
+      handleDashboardLogs(req, res);
+      return;
+    }
+
     // Route: XiaoIce webhook
-    if (req.url === '/webhooks/xiaoice' && req.method === 'POST') {
+    if (url.pathname === '/webhooks/xiaoice' && req.method === 'POST') {
       handleXiaoIceDialogue(req, res, config);
       return;
     }
@@ -41,6 +69,14 @@ function createServer(config) {
  */
 function startServer(port, config) {
   const server = createServer(config);
+  const headersTimeoutMs = Number.isFinite(config.headersTimeoutMs) && config.headersTimeoutMs > 0
+    ? config.headersTimeoutMs
+    : 15000;
+  const requestTimeoutMs = Number.isFinite(config.requestTimeoutMs) && config.requestTimeoutMs > 0
+    ? config.requestTimeoutMs
+    : 45000;
+  server.headersTimeout = headersTimeoutMs;
+  server.requestTimeout = requestTimeoutMs;
 
   server.listen(port, () => {
     console.log(`
@@ -49,6 +85,7 @@ function startServer(port, config) {
 ╠═══════════════════════════════════════════════════════════╣
 ║  Webhook:  http://localhost:${port}/webhooks/xiaoice     ║
 ║  Health:   http://localhost:${port}/health               ║
+║  Dashboard: http://localhost:${port}/dashboard           ║
 ║  Auth:     ${config.authRequired ? 'ENABLED ✓' : 'DISABLED ⚠'}                                  ║
 ╠═══════════════════════════════════════════════════════════╣
 ║  Next steps:                                            ║

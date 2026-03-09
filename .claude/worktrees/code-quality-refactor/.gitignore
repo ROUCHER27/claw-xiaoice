@@ -1,0 +1,41 @@
+# 敏感信息
+.env
+*.pid
+.ngrok-url
+
+# 日志文件
+*.log
+logs/
+
+# 备份文件
+*.bak
+*.bak.*
+openclaw.json.bak*
+
+# 临时文件和缓存
+.sisyphus/
+delivery-queue/
+credentials/
+devices/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 运行时数据
+update-check.json
+
+# Workspace 目录（包含独立的 git 仓库）
+workspace/

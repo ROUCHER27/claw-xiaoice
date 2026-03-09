@@ -1,0 +1,2 @@
+yirongb+  542617  0.0  0.0   4884  1876 ?        S    Mar04   0:00 /bin/bash -c source /home/yirongbest/.claude/shell-snapshots/snapshot-bash-1772526727300-7qq050.sh && shopt -u extglob 2>/dev/null || true && eval 'cd /home/yirongbest/.openclaw && lsof -ti\:3002 < /dev/null | xargs kill -9 2>/dev/null ; sleep 2 ; export XIAOICE_AUTH_REQUIRED\=false && node webhook-proxy.js > webhook.log 2>&1 &' && pwd -P >| /tmp/claude-b9ae-cwd
+yirongb+  542618  0.0  0.3 1409700 54356 ?       Sl   Mar04   0:01 node webhook-proxy.js

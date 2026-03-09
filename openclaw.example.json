@@ -1,0 +1,43 @@
+{
+  "channels": {
+    "xiaoice": {
+      "enabled": true,
+      "accounts": {
+        "default": {
+          "enabled": true,
+          "apiBaseUrl": "https://your-xiaoice-api.example.com",
+          "apiKey": "REPLACE_WITH_XIAOICE_API_KEY",
+          "webhookSecret": "REPLACE_WITH_XIAOICE_WEBHOOK_SECRET"
+        }
+      }
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "REPLACE_WITH_GATEWAY_TOKEN"
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "provider-name": {
+        "baseUrl": "https://provider.example.com",
+        "apiKey": "REPLACE_WITH_PROVIDER_API_KEY",
+        "auth": "api-key",
+        "api": "anthropic-messages",
+        "models": [
+          {
+            "id": "model-id",
+            "name": "Model Name",
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  }
+}

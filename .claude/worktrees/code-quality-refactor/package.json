@@ -1,0 +1,36 @@
+{
+  "name": "xiaoice-webhook-proxy",
+  "version": "1.0.0",
+  "description": "XiaoIce Webhook Proxy for OpenClaw",
+  "main": "webhook-proxy.js",
+  "scripts": {
+    "start": "node webhook-proxy.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": ["xiaoice", "webhook", "openclaw"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "coverageThresholds": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  }
+}

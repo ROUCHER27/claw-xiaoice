@@ -20,7 +20,7 @@ curl -X POST "$WEBHOOK_URL" \
   -H "x-xiaoice-signature: $SIGNATURE" \
   -H "x-xiaoice-key: $ACCESS_KEY" \
   -d "$BODY" \
-  -s | jq .
+  -s | (jq . 2>/dev/null || cat)
 
 echo ""
 print_success "Test complete"

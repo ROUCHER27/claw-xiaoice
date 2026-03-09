@@ -19,11 +19,14 @@ echo ""
 
 # 1. Process Status
 echo -e "${BLUE}[1] Process Status${NC}"
-if ps aux | grep -v grep | grep -q "node.*webhook-proxy.js"; then
-    PID=$(ps aux | grep -v grep | grep "node.*webhook-proxy.js" | awk '{print $2}' | head -1)
+WEBHOOK_PATTERN="node.*webhook-proxy(-new)?\\.js"
+if ps aux | grep -v grep | grep -Eq "$WEBHOOK_PATTERN"; then
+    PID=$(ps aux | grep -v grep | grep -E "$WEBHOOK_PATTERN" | awk '{print $2}' | head -1)
     UPTIME=$(ps -p $PID -o etime= | xargs)
+    ENTRY=$(ps -p $PID -o args= | awk '{print $NF}')
     echo -e "  ${GREEN}✓ Webhook Proxy: RUNNING${NC}"
     echo -e "    PID: $PID | Uptime: $UPTIME"
+    echo -e "    Entry: $ENTRY"
 else
     echo -e "  ${RED}✗ Webhook Proxy: STOPPED${NC}"
 fi
@@ -117,11 +120,13 @@ if [ -f "/home/yirongbest/.openclaw/webhook.log" ]; then
     TOTAL_REQUESTS=$(grep -c "Webhook request:" /home/yirongbest/.openclaw/webhook.log 2>/dev/null || echo 0)
     AUTH_SUCCESS=$(grep -c "Signature verification passed" /home/yirongbest/.openclaw/webhook.log 2>/dev/null || echo 0)
     AUTH_FAILED=$(grep -c "Authentication failed" /home/yirongbest/.openclaw/webhook.log 2>/dev/null || echo 0)
+    AUTH_DISABLED=$(grep -c "Authentication disabled - development mode only" /home/yirongbest/.openclaw/webhook.log 2>/dev/null || echo 0)
     TIMEOUTS=$(grep -c "OpenClaw timeout" /home/yirongbest/.openclaw/webhook.log 2>/dev/null || echo 0)
 
     echo -e "  Total Requests: ${CYAN}$TOTAL_REQUESTS${NC}"
     echo -e "  Auth Success: ${GREEN}$AUTH_SUCCESS${NC}"
     echo -e "  Auth Failed: ${RED}$AUTH_FAILED${NC}"
+    echo -e "  Auth Disabled: ${YELLOW}$AUTH_DISABLED${NC}"
     echo -e "  Timeouts: ${YELLOW}$TIMEOUTS${NC}"
 fi
 

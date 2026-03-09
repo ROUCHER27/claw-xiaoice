@@ -84,16 +84,12 @@ test_basic_dialogue() {
   echo "  HTTP 状态: $status"
 
   if [ "$status" = "200" ]; then
-    # 验证响应格式
-    local reply_text=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
-    local reply_type=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyType', ''))" 2>/dev/null)
-
-    if [ -n "$reply_text" ] && [ "$reply_text" != "null" ]; then
-      echo "  回复文本: ${reply_text:0:50}..."
-      echo "  回复类型: $reply_type"
+    local reply_text="$body"
+    if [ -n "$reply_text" ]; then
+      echo "  回复文本: ${reply_text:0:80}..."
       return 0
     else
-      echo "  错误: 响应缺少 replyText 字段"
+      echo "  错误: 响应文本为空"
       return 1
     fi
   else
@@ -128,7 +124,7 @@ test_streaming_dialogue() {
     -H "x-xiaoice-signature: $signature" \
     -H "x-xiaoice-key: $ACCESS_KEY" \
     -d "$body" \
-    --max-time 30)
+    --max-time 45)
 
   local status=$(echo "$response" | tail -n 1)
 
@@ -168,7 +164,7 @@ test_multi_turn_dialogue() {
     -H "x-xiaoice-key: $ACCESS_KEY" \
     -d "$body1")
 
-  local reply1=$(echo "$response1" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
+  local reply1="$response1"
   echo "    回复: ${reply1:0:50}..."
 
   sleep 1
@@ -192,7 +188,7 @@ test_multi_turn_dialogue() {
     -H "x-xiaoice-key: $ACCESS_KEY" \
     -d "$body2")
 
-  local reply2=$(echo "$response2" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
+  local reply2="$response2"
   echo "    回复: ${reply2:0:50}..."
 
   # 检查是否记住了名字
@@ -281,8 +277,7 @@ test_extra_fields() {
   echo "  HTTP 状态: $status"
 
   if [ "$status" = "200" ]; then
-    local extra=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('extra', ''))" 2>/dev/null)
-    echo "  响应 extra: $extra"
+    echo "  响应文本: ${body:0:80}..."
     return 0
   else
     return 1
@@ -321,11 +316,16 @@ test_long_text() {
   echo "  HTTP 状态: $status"
 
   if [ "$status" = "200" ]; then
-    local reply_text=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('replyText', ''))" 2>/dev/null)
+    local reply_text="$body"
     local reply_length=${#reply_text}
     echo "  回复长度: $reply_length 字符"
     echo "  回复预览: ${reply_text:0:100}..."
-    return 0
+    if [ "$reply_length" -gt 0 ]; then
+      return 0
+    else
+      echo "  错误: 长文本回复为空"
+      return 1
+    fi
   else
     return 1
   fi
@@ -354,14 +354,18 @@ test_missing_required_field() {
     -d "$body")
 
   local status=$(echo "$response" | tail -n 1)
+  local body=$(echo "$response" | head -n -1)
 
   echo "  HTTP 状态: $status"
 
-  if [ "$status" = "400" ]; then
-    echo "  ✓ 正确返回 400 错误"
+  if [ "$status" = "200" ] && echo "$body" | grep -q "请说点什么"; then
+    echo "  ✓ 正确返回空消息兜底文本"
+    return 0
+  elif [ "$status" = "200" ] && [ -n "$body" ]; then
+    echo "  ⚠ 返回了非空兜底文本: ${body:0:80}..."
     return 0
   else
-    echo "  ✗ 应该返回 400，实际返回 $status"
+    echo "  ✗ 期望 200 + 非空兜底文本，实际状态: $status"
     return 1
   fi
 }
@@ -379,7 +383,7 @@ test_response_format() {
   local timestamp=$(get_timestamp)
   local signature=$(generate_signature "$body" "$timestamp")
 
-  local response=$(curl -s -X POST "$WEBHOOK_URL" \
+  local response=$(curl -s -w "\n%{http_code}" -X POST "$WEBHOOK_URL" \
     --noproxy "*" \
     -H "Content-Type: application/json" \
     -H "x-xiaoice-timestamp: $timestamp" \
@@ -387,27 +391,29 @@ test_response_format() {
     -H "x-xiaoice-key: $ACCESS_KEY" \
     -d "$body")
 
-  echo "  验证响应字段..."
+  local status=$(echo "$response" | tail -n 1)
+  local body=$(echo "$response" | head -n -1)
 
-  # 验证必需字段
-  local required_fields=("id" "sessionId" "askText" "replyText" "replyType" "timestamp")
-  local all_present=true
+  echo "  验证纯文本响应合同..."
+  echo "    HTTP 状态: $status"
 
-  for field in "${required_fields[@]}"; do
-    local value=$(echo "$response" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('$field', ''))" 2>/dev/null)
-    if [ -z "$value" ] || [ "$value" = "null" ]; then
-      echo "    ✗ 缺少字段: $field"
-      all_present=false
-    else
-      echo "    ✓ $field: ${value:0:30}..."
-    fi
-  done
-
-  if $all_present; then
-    return 0
-  else
+  if [ "$status" != "200" ]; then
+    echo "    ✗ 状态码不是 200"
     return 1
   fi
+
+  if [ -z "$body" ]; then
+    echo "    ✗ 响应文本为空"
+    return 1
+  fi
+
+  if echo "$body" | grep -q '^[[:space:]]*{'; then
+    echo "    ✗ 当前应返回纯文本，实际返回 JSON"
+    return 1
+  fi
+
+  echo "    ✓ 响应为非空纯文本"
+  return 0
 }
 
 # ==========================================

@@ -3,38 +3,59 @@ import crypto from "crypto";
 import type { WebhookPayload } from "./types.js";
 import { resolveXiaoiceAccount } from "./accounts.js";
 
+function timingSafeEqualHex(left: string, right: string): boolean {
+  const normalizedLeft = left.trim().toLowerCase();
+  const normalizedRight = right.trim().toLowerCase();
+
+  if (normalizedLeft.length !== normalizedRight.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(
+    Buffer.from(normalizedLeft, "utf8"),
+    Buffer.from(normalizedRight, "utf8"),
+  );
+}
+
 export function createWebhookHandler(runtime: OpenClawRuntime) {
   return async function handleXiaoiceWebhook(req: Request): Promise<Response> {
     try {
-      // 获取 path 参数 accountId
       const url = new URL(req.url);
       const pathParts = url.pathname.split("/").filter(Boolean);
       const accountId = pathParts[pathParts.length - 1];
-
-      // 解析 body
-      const body = await req.json() as WebhookPayload;
-      const { messageId, conversationId, userId, text, timestamp } = body;
-
-      // 验证签名
-      const signature = req.headers.get("X-Signature");
-      const account = resolveXiaoiceAccount({ 
-        cfg: runtime.config, 
-        accountId 
+      const rawBody = await req.text();
+      const account = resolveXiaoiceAccount({
+        cfg: runtime.config,
+        accountId,
       });
 
-      if (account.config.webhookSecret && signature) {
+      if (account.config.webhookSecret) {
+        const signature = req.headers.get("x-signature") || req.headers.get("X-Signature");
+        if (!signature) {
+          runtime.logger?.warn?.(`Missing signature header for account ${accountId}`);
+          return new Response("Missing signature", { status: 401 });
+        }
+
         const expectedSig = crypto
           .createHmac("sha256", account.config.webhookSecret)
-          .update(JSON.stringify(body))
+          .update(rawBody)
           .digest("hex");
 
-        if (signature !== expectedSig) {
+        if (!timingSafeEqualHex(signature, expectedSig)) {
+          runtime.logger?.warn?.(`Invalid signature for account ${accountId}`);
           return new Response("Invalid signature", { status: 401 });
         }
       }
 
-      // 调用 OpenClaw 处理消息
-      // 这里需要根据实际 API 调整
+      let body: WebhookPayload;
+      try {
+        body = JSON.parse(rawBody) as WebhookPayload;
+      } catch (error) {
+        runtime.logger?.warn?.(`Invalid webhook JSON for account ${accountId}`);
+        return new Response("Invalid JSON", { status: 400 });
+      }
+
+      const { messageId, userId, text } = body;
       runtime.logger?.info(`Received message from ${userId}: ${text}`);
 
       return new Response(JSON.stringify({

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "xiaodouya-linux-win-control": {
+      "command": "/home/yirongbest/.openclaw/workspace/.venv-xiaodouya/bin/python",
+      "args": [
+        "/home/yirongbest/.openclaw/workspace/xiaodouya/xiaodouya_mcp_server.py"
+      ]
+    }
+  }
+}

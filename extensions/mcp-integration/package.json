@@ -1,9 +1,14 @@
 {
-  "name": "openclaw-mcp-integration",
+  "name": "mcp-integration",
   "version": "0.1.0",
   "description": "Model Context Protocol (MCP) integration for OpenClaw",
   "main": "src/index.js",
   "type": "module",
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ]
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.3",
     "eventsource": "^4.1.0",

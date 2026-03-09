@@ -11,9 +11,52 @@
  */
 function extractReplyText(stdout) {
   try {
+    const trimmed = (stdout || '').trim();
+    if (!trimmed) return '';
+
+    // 1) Try parsing complete stdout first (works for pretty-printed JSON).
+    try {
+      const fullJson = JSON.parse(trimmed);
+
+      if (fullJson.result && Array.isArray(fullJson.result.payloads)) {
+        const firstPayload = fullJson.result.payloads[0];
+        if (firstPayload && typeof firstPayload.text === 'string') {
+          return firstPayload.text;
+        }
+      }
+
+      if (fullJson.response && typeof fullJson.response.text === 'string') {
+        return fullJson.response.text;
+      }
+    } catch (e) {
+      // Ignore and continue with fallback strategies.
+    }
+
+    // 2) Try extracting the largest JSON block from mixed logs.
+    const firstBrace = trimmed.indexOf('{');
+    const lastBrace = trimmed.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        const jsonBlock = JSON.parse(trimmed.slice(firstBrace, lastBrace + 1));
+
+        if (jsonBlock.result && Array.isArray(jsonBlock.result.payloads)) {
+          const firstPayload = jsonBlock.result.payloads[0];
+          if (firstPayload && typeof firstPayload.text === 'string') {
+            return firstPayload.text;
+          }
+        }
+
+        if (jsonBlock.response && typeof jsonBlock.response.text === 'string') {
+          return jsonBlock.response.text;
+        }
+      } catch (e) {
+        // Ignore and continue.
+      }
+    }
+
+    // 3) Fallback: parse line-by-line JSON/JSONL output.
     const lines = stdout.trim().split('\n');
 
-    // Try to parse each line as JSON
     for (const line of lines) {
       if (!line.trim()) continue;
 
@@ -38,7 +81,6 @@ function extractReplyText(stdout) {
       }
     }
 
-    // Could not extract text
     return '';
   } catch (error) {
     return '';

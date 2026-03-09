@@ -16,10 +16,10 @@ export WEBHOOK_PORT="${PORT:-3002}"
 # 认证配置
 export ACCESS_KEY="${XIAOICE_ACCESS_KEY:-test-key}"
 export SECRET_KEY="${XIAOICE_SECRET_KEY:-test-secret}"
-export AUTH_REQUIRED="${XIAOICE_AUTH_REQUIRED:-true}"
+export AUTH_REQUIRED="${XIAOICE_AUTH_REQUIRED:-false}"
 
 # 超时配置
-export TIMEOUT="${XIAOICE_TIMEOUT:-18000}"
+export TIMEOUT="${XIAOICE_TIMEOUT:-30000}"
 
 # Ngrok 配置
 export NGROK_API_URL="${NGROK_API_URL:-http://localhost:4040/api/tunnels}"

@@ -1,0 +1,1338 @@
+
+╔═══════════════════════════════════════════════════════════╗
+║         XiaoIce Webhook Proxy                           ║
+╠═══════════════════════════════════════════════════════════╣
+║  Webhook:  http://localhost:3002/webhooks/xiaoice     ║
+║  Health:   http://localhost:3002/health               ║
+║  Auth:     DISABLED ⚠                                  ║
+╠═══════════════════════════════════════════════════════════╣
+║  Next steps:                                            ║
+║  1. Test: curl http://localhost:3002/health          ║
+║  2. Expose: ngrok http 3002                          ║
+║  3. Configure XiaoIce webhook URL                       ║
+╚═══════════════════════════════════════════════════════════╝
+  
+[33m⚠ WARNING: Authentication is DISABLED[0m
+[33m⚠ This should ONLY be used in development/testing[0m
+[33m⚠ Set XIAOICE_AUTH_REQUIRED=true for production
+[0m
+[2026-03-04T09:18:57.726Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:18:57.727Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:18:57.727Z] [INFO] Received webhook payload
+{
+  "askText": "你好，请介绍一下你自己",
+  "sessionId": "test-session-001",
+  "streaming": false
+}
+[2026-03-04T09:18:57.727Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-session-001",
+    "--message",
+    "你好，请介绍一下你自己",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 11
+}
+[2026-03-04T09:19:17.192Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"ffc4cb97-9f49-49fd-be9f-4cf223489759\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"我是 OpenClaw，一个 AI 助手。\\n\\n目前我运行在你的电脑上，通过小冰（xiao..."
+}
+[2026-03-04T09:19:17.192Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 11,
+  "processingTime": 19465,
+  "cacheHit": true
+}
+[2026-03-04T09:19:17.192Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-session-001",
+  "textLength": 145,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772615957192-z6zfkfalf",
+    "traceId": "trace-001",
+    "sessionId": "test-session-001",
+    "askText": "你好，请介绍一下你自己",
+    "replyText": "我是 OpenClaw，一个 AI 助手。，目前我运行在你的电脑上，通过小冰（xiaoice）通道跟你聊天。，我目前用的模型是 Haiku（速度快但能力较弱，之前试过 Opus 会慢一些）。，我能帮你查天气、搜新闻、管文件、读飞书文档等。，你之前说想给我起名字，但还没想好。要不现在想一个？",
+    "replyType": "Llm",
+    "timestamp": 1772615957192,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:19:17.264Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:17.264Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:17.264Z] [INFO] Received webhook payload
+{
+  "askText": "请用三句话介绍人工智能",
+  "sessionId": "test-session-002",
+  "streaming": true
+}
+[2026-03-04T09:19:17.264Z] [INFO] Starting streaming response
+[2026-03-04T09:19:17.264Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-session-002",
+    "--message",
+    "请用三句话介绍人工智能",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 11
+}
+[2026-03-04T09:19:22.118Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"f53c2d6c-4bba-4302-8bdc-0fe859df87af\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"1. **人工智能（AI）** 是让计算机模拟人类思考、学习、推理的技术，包括语音识别、图像..."
+}
+[2026-03-04T09:19:22.119Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 11,
+  "processingTime": 4855,
+  "cacheHit": true
+}
+[2026-03-04T09:19:22.119Z] [INFO] Streaming response completed
+{
+  "sessionId": "test-session-002",
+  "textLength": 145,
+  "voiceOptimized": true
+}
+[2026-03-04T09:19:22.133Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:22.134Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:22.134Z] [INFO] Received webhook payload
+{
+  "askText": "我叫小明",
+  "sessionId": "test-session-multi-1772615962",
+  "streaming": false
+}
+[2026-03-04T09:19:22.134Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-session-multi-1772615962",
+    "--message",
+    "我叫小明",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 4
+}
+[2026-03-04T09:19:27.629Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"a7e8d761-a1ba-40cc-a220-2c6844e4ed47\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"你好小明！👋 \\n\\n记住你了！需要啥帮忙的随时说。\",\n        \"mediaUr..."
+}
+[2026-03-04T09:19:27.629Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 4,
+  "processingTime": 5495,
+  "cacheHit": true
+}
+[2026-03-04T09:19:27.630Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-session-multi-1772615962",
+  "textLength": 22,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772615967629-u5x3eu1et",
+    "traceId": "trace-multi-1",
+    "sessionId": "test-session-multi-1772615962",
+    "askText": "我叫小明",
+    "replyText": "你好小明！ ，记住你了！需要啥帮忙的随时说。",
+    "replyType": "Llm",
+    "timestamp": 1772615967629,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:19:28.659Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:28.659Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:28.659Z] [INFO] Received webhook payload
+{
+  "askText": "我叫什么名字？",
+  "sessionId": "test-session-multi-1772615962",
+  "streaming": false
+}
+[2026-03-04T09:19:28.659Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-session-multi-1772615962",
+    "--message",
+    "我叫什么名字？",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 7
+}
+[2026-03-04T09:19:41.062Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"96312b43-fcd6-4386-8782-f6ed27c8fde3\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"你叫**小明**！对吧？\",\n        \"mediaUrl\": null\n      ..."
+}
+[2026-03-04T09:19:41.062Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 7,
+  "processingTime": 12403,
+  "cacheHit": true
+}
+[2026-03-04T09:19:41.062Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-session-multi-1772615962",
+  "textLength": 8,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772615981062-lqhc6zq3a",
+    "traceId": "trace-multi-2",
+    "sessionId": "test-session-multi-1772615962",
+    "askText": "我叫什么名字？",
+    "replyText": "你叫小明！对吧？",
+    "replyType": "Llm",
+    "timestamp": 1772615981062,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:19:41.091Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:41.091Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:41.091Z] [INFO] Received webhook payload
+{
+  "askText": "你好",
+  "sessionId": "test-lang-zh",
+  "streaming": false
+}
+[2026-03-04T09:19:41.091Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-lang-zh",
+    "--message",
+    "你好",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 2
+}
+[2026-03-04T09:19:44.316Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"2eb991af-8dc5-43a1-a9fd-308782102b73\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"你好小明！😄 有事找我？\",\n        \"mediaUrl\": null\n     ..."
+}
+[2026-03-04T09:19:44.317Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 2,
+  "processingTime": 3226,
+  "cacheHit": true
+}
+[2026-03-04T09:19:44.317Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-lang-zh",
+  "textLength": 11,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772615984317-a03hdele8",
+    "traceId": "",
+    "sessionId": "test-lang-zh",
+    "askText": "你好",
+    "replyText": "你好小明！ 有事找我？",
+    "replyType": "Llm",
+    "timestamp": 1772615984317,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:19:44.330Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:44.330Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:44.330Z] [INFO] Received webhook payload
+{
+  "askText": "Hello",
+  "sessionId": "test-lang-en",
+  "streaming": false
+}
+[2026-03-04T09:19:44.330Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-lang-en",
+    "--message",
+    "Hello",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 5
+}
+[2026-03-04T09:19:47.393Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"29eff2bc-2f56-40b0-a4f3-a6b7be049955\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"Hello小明！😄\",\n        \"mediaUrl\": null\n      }\n..."
+}
+[2026-03-04T09:19:47.393Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 5,
+  "processingTime": 3063,
+  "cacheHit": true
+}
+[2026-03-04T09:19:47.394Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-lang-en",
+  "textLength": 8,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772615987394-p3hujwesl",
+    "traceId": "",
+    "sessionId": "test-lang-en",
+    "askText": "Hello",
+    "replyText": "Hello小明！",
+    "replyType": "Llm",
+    "timestamp": 1772615987394,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:19:47.405Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:47.405Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:47.405Z] [INFO] Received webhook payload
+{
+  "askText": "こんにちは",
+  "sessionId": "test-lang-ja",
+  "streaming": false
+}
+[2026-03-04T09:19:47.405Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-lang-ja",
+    "--message",
+    "こんにちは",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 5
+}
+[2026-03-04T09:19:50.367Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"528b74cc-1492-4c56-b3f3-1b3957f4ad9e\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"こんにちは小明！🌸 有啥事？\",\n        \"mediaUrl\": null\n   ..."
+}
+[2026-03-04T09:19:50.367Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 5,
+  "processingTime": 2962,
+  "cacheHit": true
+}
+[2026-03-04T09:19:50.368Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-lang-ja",
+  "textLength": 13,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772615990367-c44h0tnxj",
+    "traceId": "",
+    "sessionId": "test-lang-ja",
+    "askText": "こんにちは",
+    "replyText": "こんにちは小明！ 有啥事？",
+    "replyType": "Llm",
+    "timestamp": 1772615990367,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:19:50.406Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:19:50.406Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:19:50.406Z] [INFO] Received webhook payload
+{
+  "askText": "测试 extra 字段",
+  "sessionId": "test-extra-001",
+  "streaming": false
+}
+[2026-03-04T09:19:50.406Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-extra-001",
+    "--message",
+    "测试 extra 字段",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 11
+}
+[2026-03-04T09:20:05.756Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"83c112e4-65a0-47be-bdc1-3fda90a14acd\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"收到！测试啥？🤔\",\n        \"mediaUrl\": null\n      }\n ..."
+}
+[2026-03-04T09:20:05.756Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 11,
+  "processingTime": 15350,
+  "cacheHit": true
+}
+[2026-03-04T09:20:05.757Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-extra-001",
+  "textLength": 7,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772616005757-5y64tinyz",
+    "traceId": "",
+    "sessionId": "test-extra-001",
+    "askText": "测试 extra 字段",
+    "replyText": "收到！测试啥？",
+    "replyType": "Llm",
+    "timestamp": 1772616005757,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:20:05.790Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:20:05.790Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:20:05.790Z] [INFO] Received webhook payload
+{
+  "askText": "请详细介绍一下人工智能的发展历史，包括早期的图灵测试、专家系统时代、机器学习的兴起、深度学习革命，以",
+  "sessionId": "test-long-text-001",
+  "streaming": false
+}
+[2026-03-04T09:20:05.790Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-long-text-001",
+    "--message",
+    "请详细介绍一下人工智能的发展历史，包括早期的图灵测试、专家系统时代、机器学习的兴起、深度学习革命，以及最近的大语言模型时代。",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 62
+}
+[2026-03-04T09:20:14.342Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"75a996a8-c6fe-4bd2-b8b2-ffd41bdfc28c\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"## 人工智能发展史\\n\\n### 🤖 早期探索（图灵时代）\\n\\n- **1950年**..."
+}
+[2026-03-04T09:20:14.342Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 62,
+  "processingTime": 8552,
+  "cacheHit": true
+}
+[2026-03-04T09:20:14.343Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-long-text-001",
+  "textLength": 605,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772616014343-h4v9hy52h",
+    "traceId": "trace-long-001",
+    "sessionId": "test-long-text-001",
+    "askText": "请详细介绍一下人工智能的发展历史，包括早期的图灵测试、专家系统时代、机器学习的兴起、深度学习革命，以及最近的大语言模型时代。",
+    "replyText": "人工智能发展史， 早期探索（图灵时代），1950年：图灵发表论文《 Computing Machinery and Intelligence》，提出图灵测试——如果机器能骗过人类让其以为是真人，就算有智能。，1956年：达特茅斯会议正式提出\"人工智能\"概念，AI 诞生。， 专家系统时代（1960-1980s），早期 AI 研究集中在规则系统，模拟专家思维，代表成果：MYCIN（医疗诊断）、DENDRAL（化学分析），局限：知识需人工编码，无法自动学习， 机器学习兴起（1990s-2010s），不再硬编码规则，而是让算法从数据中学习，代表技术：支持向量机（SVM）、随机森林、决策树，突破：2012年 ImageNet 竞赛，深度学习胜出， 深度学习革命（2012-2020），2016：AlphaGo 击败李世石，强化学习惊艳世界，2018：BERT、GPT 横空出世，GPU/TPU 算力大增，语音、图像识别超越人类， 大语言模型时代（2020-至今），2020：GPT-3 发布，1750亿参数，2022：ChatGPT 爆火，AI 进入大众视野，2023-2024：多模态、Agent、Claude、Gemini 等百花齐放，2025-2026：AI Agent、o1/o3 推理模型、DeepSeek 等开源崛起，---，现在 AI 能写代码、作画、看病、写文章，甚至能\"思考\"了。变化真的很快！",
+    "replyType": "Llm",
+    "timestamp": 1772616014343,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T09:20:14.399Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:20:14.399Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:20:14.399Z] [INFO] Received webhook payload
+{
+  "sessionId": "test-error-001",
+  "streaming": false
+}
+[2026-03-04T09:20:14.411Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T09:20:14.411Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T09:20:14.411Z] [INFO] Received webhook payload
+{
+  "askText": "测试响应格式",
+  "sessionId": "test-format-001",
+  "streaming": false
+}
+[2026-03-04T09:20:14.411Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "test-format-001",
+    "--message",
+    "测试响应格式",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 6
+}
+[2026-03-04T09:20:18.652Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"6ab86b14-be5e-455c-a20a-9542e7b22f12\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"收到，响应正常！✅\",\n        \"mediaUrl\": null\n      }\n ..."
+}
+[2026-03-04T09:20:18.652Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 6,
+  "processingTime": 4241,
+  "cacheHit": true
+}
+[2026-03-04T09:20:18.652Z] [INFO] Response sent successfully
+{
+  "sessionId": "test-format-001",
+  "textLength": 9,
+  "voiceOptimized": true,
+  "response": {
+    "id": "xiaoice-1772616018652-nkw68qpoz",
+    "traceId": "trace-format-001",
+    "sessionId": "test-format-001",
+    "askText": "测试响应格式",
+    "replyText": "收到，响应正常！✅",
+    "replyType": "Llm",
+    "timestamp": 1772616018652,
+    "replyPayload": {},
+    "extra": {
+      "modelName": "openclaw"
+    }
+  }
+}
+[2026-03-04T10:54:05.262Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:54:05.264Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:54:05.264Z] [INFO] Received webhook payload
+{
+  "askText": "今天怎么样？",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:54:05.264Z] [INFO] Starting streaming response
+[2026-03-04T10:54:05.264Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "今天怎么样？",
+    "--thinking",
+    "medium",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "medium",
+  "questionLength": 6
+}
+[2026-03-04T10:54:14.456Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"bd1b53e2-2438-47ca-92d0-45594228a78e\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"上海今天：\\n\\n- ☁️ 多云\\n- 🌡️ **8.8°C**（比昨天暖和点了）\\n- ..."
+}
+[2026-03-04T10:54:14.456Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "medium",
+  "questionLength": 6,
+  "processingTime": 9192,
+  "cacheHit": true
+}
+[2026-03-04T10:54:14.457Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 55,
+  "voiceOptimized": true
+}
+[2026-03-04T10:55:04.696Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:55:04.697Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:55:04.698Z] [INFO] Received webhook payload
+{
+  "askText": "你现在用的是啥模型",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:55:04.698Z] [INFO] Starting streaming response
+[2026-03-04T10:55:04.698Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "你现在用的是啥模型",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 9
+}
+[2026-03-04T10:55:10.461Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"79e0049d-f640-4596-9b16-6a500ced5abd\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"现在用 **Haiku**（速度快，能力较弱）\\n\\n之前试过 Opus 但太慢了。你想换回..."
+}
+[2026-03-04T10:55:10.461Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 9,
+  "processingTime": 5763,
+  "cacheHit": true
+}
+[2026-03-04T10:55:10.461Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 49,
+  "voiceOptimized": true
+}
+[2026-03-04T10:55:28.795Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:55:28.795Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:55:28.795Z] [INFO] Received webhook payload
+{
+  "askText": "不用就这个吧 挺好的",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:55:28.795Z] [INFO] Starting streaming response
+[2026-03-04T10:55:28.795Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "不用就这个吧 挺好的",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 10
+}
+[2026-03-04T10:55:33.669Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"259eddfd-2fdd-4917-ac20-910cd0167334\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"好，Haiku 挺好，省钱速度快！🚀 有事随时叫我。\",\n        \"mediaUr..."
+}
+[2026-03-04T10:55:33.669Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 10,
+  "processingTime": 4874,
+  "cacheHit": true
+}
+[2026-03-04T10:55:33.669Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 25,
+  "voiceOptimized": true
+}
+[2026-03-04T10:55:52.443Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:55:52.443Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:55:52.444Z] [INFO] Received webhook payload
+{
+  "askText": "有个问题，我想让你直接在飞书里发一个信息，但是我想让你调用opus。",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:55:52.444Z] [INFO] Starting streaming response
+[2026-03-04T10:55:52.444Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "有个问题，我想让你直接在飞书里发一个信息，但是我想让你调用opus。",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 34
+}
+[2026-03-04T10:56:01.169Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"c44008d0-0ab4-4451-b73c-25eac6ecc080\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"好，我切换到 Opus 来处理飞书消息。稍等。\",\n        \"mediaUrl\": ..."
+}
+[2026-03-04T10:56:01.169Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 34,
+  "processingTime": 8725,
+  "cacheHit": true
+}
+[2026-03-04T10:56:01.169Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 23,
+  "voiceOptimized": true
+}
+[2026-03-04T10:56:01.775Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:56:01.775Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:56:01.775Z] [INFO] Received webhook payload
+{
+  "askText": "我年轻，没有彷徨。我是想，我就怕卧蚕，提然，我就怕卧蚕。",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:56:01.775Z] [INFO] Starting streaming response
+[2026-03-04T10:56:01.775Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "我年轻，没有彷徨。我是想，我就怕卧蚕，提然，我就怕卧蚕。",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 28
+}
+[2026-03-04T10:56:01.969Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:56:01.969Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:56:01.969Z] [INFO] Received webhook payload
+{
+  "askText": "高层次。",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:56:01.969Z] [INFO] Starting streaming response
+[2026-03-04T10:56:01.969Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "高层次。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 4
+}
+[2026-03-04T10:56:09.930Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:56:09.931Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:56:09.931Z] [INFO] Received webhook payload
+{
+  "askText": "我。",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:56:09.931Z] [INFO] Starting streaming response
+[2026-03-04T10:56:09.931Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "我。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 2
+}
+[2026-03-04T10:56:10.676Z] [INFO] OpenClaw response
+{
+  "stdout": "\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_doc: Registered feishu_doc, feishu_app_scopes\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_wiki: Registered feishu_wiki tool\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_drive: Registe..."
+}
+[2026-03-04T10:56:10.676Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 4,
+  "processingTime": 8707,
+  "cacheHit": true
+}
+[2026-03-04T10:56:10.676Z] [ERROR] Failed to extract reply text
+{
+  "error": "Unexpected token '\u001b', \"\u001b[35m[plug\"... is not valid JSON",
+  "stdout": "\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_doc: Registered feishu_doc, feishu_app_scopes\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_wiki: Registered feishu_wiki tool\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_drive: Registe"
+}
+[2026-03-04T10:56:10.676Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 0,
+  "voiceOptimized": true
+}
+[2026-03-04T10:56:25.997Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:56:25.997Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:56:25.997Z] [INFO] Received webhook payload
+{
+  "askText": "那我想。",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:56:25.997Z] [INFO] Starting streaming response
+[2026-03-04T10:56:25.997Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "那我想。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 4
+}
+[2026-03-04T10:56:26.383Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:56:26.384Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:56:26.384Z] [INFO] Received webhook payload
+{
+  "askText": "现在让你调克斯来给我的飞书发信息可以吗？",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:56:26.384Z] [INFO] Starting streaming response
+[2026-03-04T10:56:26.384Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "现在让你调克斯来给我的飞书发信息可以吗？",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 20
+}
+[2026-03-04T10:56:26.777Z] [ERROR] OpenClaw timeout
+{
+  "timeout": 25000
+}
+[2026-03-04T10:56:26.778Z] [ERROR] Processing error
+{
+  "error": "TIMEOUT"
+}
+[2026-03-04T10:56:31.596Z] [INFO] OpenClaw response
+{
+  "stdout": "\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_doc: Registered feishu_doc, feishu_app_scopes\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_wiki: Registered feishu_wiki tool\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_drive: Registe..."
+}
+[2026-03-04T10:56:31.596Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 2,
+  "processingTime": 21665,
+  "cacheHit": true
+}
+[2026-03-04T10:56:31.596Z] [ERROR] Failed to extract reply text
+{
+  "error": "Unexpected token '\u001b', \"\u001b[35m[plug\"... is not valid JSON",
+  "stdout": "\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_doc: Registered feishu_doc, feishu_app_scopes\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_wiki: Registered feishu_wiki tool\u001b[39m\n\u001b[35m[plugins]\u001b[39m \u001b[36mfeishu_drive: Registe"
+}
+[2026-03-04T10:56:31.597Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 0,
+  "voiceOptimized": true
+}
+[2026-03-04T10:56:33.908Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:56:33.909Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:56:33.909Z] [INFO] Received webhook payload
+{
+  "askText": "OPPO不是克服。",
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "streaming": true
+}
+[2026-03-04T10:56:33.909Z] [INFO] Starting streaming response
+[2026-03-04T10:56:33.909Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "87dda6b931c84ca7b725e53f02c03e84",
+    "--message",
+    "OPPO不是克服。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 9
+}
+[2026-03-04T10:56:35.965Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"d5a6bf02-e80d-4932-8eea-3cc83486f5ec\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"想啥？慢慢说～\",\n        \"mediaUrl\": null\n      }\n   ..."
+}
+[2026-03-04T10:56:35.965Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 4,
+  "processingTime": 9968,
+  "cacheHit": true
+}
+[2026-03-04T10:56:35.965Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 7,
+  "voiceOptimized": true
+}
+[2026-03-04T10:56:40.750Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"f2ae92dc-7d04-4e24-98e2-3268da020523\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"可以！但需要你的**飞书 User ID**才能发给你。\\n\\n你知道你的飞书 ID 吗？通..."
+}
+[2026-03-04T10:56:40.751Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 20,
+  "processingTime": 14367,
+  "cacheHit": true
+}
+[2026-03-04T10:56:40.751Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 92,
+  "voiceOptimized": true
+}
+[2026-03-04T10:56:43.306Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"dd6b7e6d-a4b9-4891-9143-c64752ea8b6b\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"你说啥？打错字了？😂 再說一遍？\",\n        \"mediaUrl\": null\n ..."
+}
+[2026-03-04T10:56:43.306Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 9,
+  "processingTime": 9397,
+  "cacheHit": true
+}
+[2026-03-04T10:56:43.306Z] [INFO] Streaming response completed
+{
+  "sessionId": "87dda6b931c84ca7b725e53f02c03e84",
+  "textLength": 15,
+  "voiceOptimized": true
+}
+[2026-03-04T10:58:35.178Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:58:35.178Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:58:35.178Z] [INFO] Received webhook payload
+{
+  "askText": "现在你可以直接调模型给我的飞书发信息吗？",
+  "sessionId": "3ed6df6bc8534de4939c704d20a8e0ec",
+  "streaming": true
+}
+[2026-03-04T10:58:35.178Z] [INFO] Starting streaming response
+[2026-03-04T10:58:35.178Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "3ed6df6bc8534de4939c704d20a8e0ec",
+    "--message",
+    "现在你可以直接调模型给我的飞书发信息吗？",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 20
+}
+[2026-03-04T10:58:39.539Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"32729460-3a97-44aa-8d13-287f950246a2\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"可以！我现在已经用 **Opus** 了（刚才切换的）。\\n\\n但发到飞书需要知道发给谁——..."
+}
+[2026-03-04T10:58:39.539Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 20,
+  "processingTime": 4361,
+  "cacheHit": true
+}
+[2026-03-04T10:58:39.540Z] [INFO] Streaming response completed
+{
+  "sessionId": "3ed6df6bc8534de4939c704d20a8e0ec",
+  "textLength": 59,
+  "voiceOptimized": true
+}
+[2026-03-04T10:58:44.666Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:58:44.666Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:58:44.666Z] [INFO] Received webhook payload
+{
+  "askText": "可以。",
+  "sessionId": "3ed6df6bc8534de4939c704d20a8e0ec",
+  "streaming": true
+}
+[2026-03-04T10:58:44.666Z] [INFO] Starting streaming response
+[2026-03-04T10:58:44.666Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "3ed6df6bc8534de4939c704d20a8e0ec",
+    "--message",
+    "可以。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 3
+}
+[2026-03-04T10:59:03.946Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"5f0884d1-9b24-43b9-ad72-a74748503e33\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"有权限，但需要你的**飞书 ID** 才能定向发消息。\\n\\n你现在是通过**小冰**跟我聊..."
+}
+[2026-03-04T10:59:03.946Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 3,
+  "processingTime": 19280,
+  "cacheHit": true
+}
+[2026-03-04T10:59:03.946Z] [INFO] Streaming response completed
+{
+  "sessionId": "3ed6df6bc8534de4939c704d20a8e0ec",
+  "textLength": 103,
+  "voiceOptimized": true
+}
+[2026-03-04T10:59:32.081Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:59:32.081Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:59:32.081Z] [INFO] Received webhook payload
+{
+  "askText": "",
+  "sessionId": "3ed6df6bc8534de4939c704d20a8e0ec",
+  "streaming": true
+}
+[2026-03-04T10:59:32.481Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-04T10:59:32.481Z] [WARN] Authentication disabled - development mode only
+[2026-03-04T10:59:32.481Z] [INFO] Received webhook payload
+{
+  "askText": "",
+  "sessionId": "3ed6df6bc8534de4939c704d20a8e0ec",
+  "streaming": true
+}
+[2026-03-05T03:20:59.363Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-05T03:20:59.365Z] [WARN] Authentication disabled - development mode only
+[2026-03-05T03:20:59.366Z] [INFO] Received webhook payload
+{
+  "askText": "帮我发个邮件。",
+  "sessionId": "2a5f958e99954c56ac7d4b65105d5403",
+  "streaming": true
+}
+[2026-03-05T03:20:59.366Z] [INFO] Starting streaming response
+[2026-03-05T03:20:59.367Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "2a5f958e99954c56ac7d4b65105d5403",
+    "--message",
+    "帮我发个邮件。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 7
+}
+[2026-03-05T03:21:06.353Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"c49ed18d-26a7-4677-ac91-33ef060ee0b0\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"好的！告诉我这些信息：\\n\\n1. **收件人邮箱**\\n2. **邮件主题**\\n3. *..."
+}
+[2026-03-05T03:21:06.353Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 7,
+  "processingTime": 6986,
+  "cacheHit": true
+}
+[2026-03-05T03:21:06.355Z] [INFO] Streaming response completed
+{
+  "sessionId": "2a5f958e99954c56ac7d4b65105d5403",
+  "textLength": 42,
+  "voiceOptimized": true
+}
+[2026-03-05T05:11:03.187Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-05T05:11:03.188Z] [WARN] Authentication disabled - development mode only
+[2026-03-05T05:11:03.189Z] [INFO] Received webhook payload
+{
+  "askText": "嗨。",
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "streaming": true
+}
+[2026-03-05T05:11:03.189Z] [INFO] Starting streaming response
+[2026-03-05T05:11:03.189Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "14c3e5eb99eb46bf8430d673f6a031c3",
+    "--message",
+    "嗨。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 2
+}
+[2026-03-05T05:11:08.916Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"2cbc46cc-11ca-4999-8ed2-3d67b01292ef\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"嗨！👋\",\n        \"mediaUrl\": null\n      }\n    ],..."
+}
+[2026-03-05T05:11:08.916Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 2,
+  "processingTime": 5727,
+  "cacheHit": true
+}
+[2026-03-05T05:11:08.916Z] [INFO] Streaming response completed
+{
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "textLength": 2,
+  "voiceOptimized": true
+}
+[2026-03-05T05:11:19.904Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-05T05:11:19.905Z] [WARN] Authentication disabled - development mode only
+[2026-03-05T05:11:19.905Z] [INFO] Received webhook payload
+{
+  "askText": "吃了吗？",
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "streaming": true
+}
+[2026-03-05T05:11:19.905Z] [INFO] Starting streaming response
+[2026-03-05T05:11:19.905Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "14c3e5eb99eb46bf8430d673f6a031c3",
+    "--message",
+    "吃了吗？",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 4
+}
+[2026-03-05T05:11:25.441Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"63fdb8e1-d506-4f03-9cac-053b14d35d94\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"我不吃饭的 😊\\n\\n你吃午饭了吗？\",\n        \"mediaUrl\": null..."
+}
+[2026-03-05T05:11:25.441Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 4,
+  "processingTime": 5536,
+  "cacheHit": true
+}
+[2026-03-05T05:11:25.441Z] [INFO] Streaming response completed
+{
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "textLength": 14,
+  "voiceOptimized": true
+}
+[2026-03-05T05:11:34.900Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-05T05:11:34.900Z] [WARN] Authentication disabled - development mode only
+[2026-03-05T05:11:34.900Z] [INFO] Received webhook payload
+{
+  "askText": "你怎么知道现在是中午的？",
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "streaming": true
+}
+[2026-03-05T05:11:34.900Z] [INFO] Starting streaming response
+[2026-03-05T05:11:34.900Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "14c3e5eb99eb46bf8430d673f6a031c3",
+    "--message",
+    "你怎么知道现在是中午的？",
+    "--thinking",
+    "low",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "low",
+  "questionLength": 12
+}
+[2026-03-05T05:11:41.247Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"fb7ff3a0-47f6-44cf-94a6-219dc0134321\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"从你的消息时间戳看到的——现在是 13:11（下午 1 点多），刚好是午饭时间嘛。\\n\\n而..."
+}
+[2026-03-05T05:11:41.248Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "low",
+  "questionLength": 12,
+  "processingTime": 6348,
+  "cacheHit": true
+}
+[2026-03-05T05:11:41.248Z] [INFO] Streaming response completed
+{
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "textLength": 98,
+  "voiceOptimized": true
+}
+[2026-03-05T05:12:03.986Z] [INFO] Webhook request: POST /webhooks/xiaoice
+[2026-03-05T05:12:03.986Z] [WARN] Authentication disabled - development mode only
+[2026-03-05T05:12:03.986Z] [INFO] Received webhook payload
+{
+  "askText": "你真聪明。",
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "streaming": true
+}
+[2026-03-05T05:12:03.987Z] [INFO] Starting streaming response
+[2026-03-05T05:12:03.987Z] [INFO] Calling OpenClaw CLI
+{
+  "args": [
+    "agent",
+    "--channel",
+    "xiaoice",
+    "--to",
+    "14c3e5eb99eb46bf8430d673f6a031c3",
+    "--message",
+    "你真聪明。",
+    "--thinking",
+    "minimal",
+    "--json"
+  ],
+  "streaming": false,
+  "thinkingLevel": "minimal",
+  "questionLength": 5
+}
+[2026-03-05T05:12:10.386Z] [INFO] OpenClaw response
+{
+  "stdout": "{\n  \"runId\": \"48dcabce-77cb-409a-a9cd-316e4b588e6c\",\n  \"status\": \"ok\",\n  \"summary\": \"completed\",\n  \"result\": {\n    \"payloads\": [\n      {\n        \"text\": \"谢谢 😊\\n\\n不过这只是基本功啦，有什么需要帮忙的尽管说！\",\n        \"med..."
+}
+[2026-03-05T05:12:10.386Z] [INFO] Performance metrics
+{
+  "thinkingLevel": "minimal",
+  "questionLength": 5,
+  "processingTime": 6399,
+  "cacheHit": true
+}
+[2026-03-05T05:12:10.387Z] [INFO] Streaming response completed
+{
+  "sessionId": "14c3e5eb99eb46bf8430d673f6a031c3",
+  "textLength": 26,
+  "voiceOptimized": true
+}

@@ -1,5 +1,6 @@
 # 敏感信息
 .env
+openclaw.json
 *.pid
 .ngrok-url
 

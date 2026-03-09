@@ -21,9 +21,12 @@ echo ""
 
 # Status check
 echo -e "${BLUE}[Status Check]${NC}"
-if ps aux | grep -v grep | grep -q "node.*webhook-proxy.js"; then
-    PID=$(ps aux | grep -v grep | grep "node.*webhook-proxy.js" | awk '{print $2}' | head -1)
+WEBHOOK_PATTERN="node.*webhook-proxy(-new)?\\.js"
+if ps aux | grep -v grep | grep -Eq "$WEBHOOK_PATTERN"; then
+    PID=$(ps aux | grep -v grep | grep -E "$WEBHOOK_PATTERN" | awk '{print $2}' | head -1)
+    ENTRY=$(ps -p $PID -o args= | awk '{print $NF}')
     echo -e "  ${GREEN}✓ Webhook: RUNNING (PID: $PID)${NC}"
+    echo -e "    Entry: ${CYAN}$ENTRY${NC}"
 else
     echo -e "  ${RED}✗ Webhook: STOPPED${NC}"
 fi
