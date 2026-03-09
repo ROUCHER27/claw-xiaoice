@@ -60,13 +60,6 @@
     }
   },
   "plugins": {
-    "load": {
-      "paths": [
-        "/home/yirongbest/claw-xiaoice/extensions/mcp-integration",
-        "/home/yirongbest/claw-xiaoice/extensions/xiaoice",
-        "/home/yirongbest/claw-xiaoice/extensions/video-orchestrator"
-      ]
-    },
     "entries": {
       "feishu": {
         "enabled": true
@@ -87,19 +80,11 @@
                 "/home/yirongbest/.openclaw/node_modules/@gongrzhe/server-gmail-autoauth-mcp/dist/index.js"
               ],
               "env": {
-                "GMAIL_OAUTH_PATH": "/home/yirongbest/claw-xiaoice/credentials/gmail-mcp/gcp-oauth.keys.json",
-                "GMAIL_CREDENTIALS_PATH": "/home/yirongbest/claw-xiaoice/credentials/gmail-mcp/credentials.json"
+                "GMAIL_OAUTH_PATH": "/home/yirongbest/.openclaw/credentials/gmail-mcp/gcp-oauth.keys.json",
+                "GMAIL_CREDENTIALS_PATH": "/home/yirongbest/.openclaw/credentials/gmail-mcp/credentials.json"
               }
             }
           }
-        }
-      },
-      "video-orchestrator": {
-        "enabled": true,
-        "config": {
-          "serviceBaseUrl": "http://127.0.0.1:3105",
-          "internalToken": "video-internal-token",
-          "requestTimeoutMs": 15000
         }
       }
     }
@@ -111,16 +96,37 @@
         "baseUrl": "https://api.minimax.chat/v1",
         "apiKey": "sk-cp-RqhWkvRUYGhG2cMFwUH-60S5f7agloq7ek2aDGsDg6GvnNZa8kcqPLjDnqyvbAnsr0gOvLdaoyD7MN23Y8BWHyIzrNIHBr2-gkfsZ0X0UjWd-DWxwcqSTRU",
         "auth": "api-key",
+        "api": "chat/completions",
         "models": [
           {
             "id": "MiniMax-M2.5-highspeed",
             "name": "MiniMax M2.5 Highspeed",
             "contextWindow": 200000,
             "maxTokens": 8192
-          },
+          }
+        ]
+      },
+        "baseUrl": "https://api.minimax.chat/v1",
+        "apiKey": "sk-cp-RqhWkvRUYGhG2cMFwUH-60S5f7agloq7ek2aDGsDg6GvnNZa8kcqPLjDnqyvbAnsr0gOvLdaoyD7MN23Y8BWHyIzrNIHBr2-gkfsZ0X0UjWd-DWxwcqSTRU",
+        "auth": "api-key",
+        "api": "chat/completions",
+        "models": [
           {
             "id": "MiniMax-Text-01",
             "name": "MiniMax Text 01",
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      },
+        "baseUrl": "https://api.minimax.chat/v1",
+        "apiKey": "sk-cp-RqhWkvRUYGhG2cMFwUH-60S5f7agloq7ek2aDGsDg6GvnNZa8kcqPLjDnqyvbAnsr0gOvLdaoyD7MN23Y8BWHyIzrNIHBr2-gkfsZ0X0UjWd-DWxwcqSTRU",
+        "auth": "api-key",
+        "api": "chat/completions",
+        "models": [
+          {
+            "id": "MiniMax-M2.5-highspeed",
+            "name": "MiniMax M2.5 Highspeed",
             "contextWindow": 200000,
             "maxTokens": 8192
           }
@@ -175,7 +181,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "yunyi-claude/claude-sonnet-4-6"
+        "primary": "minimax-cn/MiniMax-M2.5-highspeed"
       }
     }
   }

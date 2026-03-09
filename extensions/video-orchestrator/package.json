@@ -1,0 +1,11 @@
+{
+  "name": "video-orchestrator",
+  "version": "0.1.0",
+  "description": "OpenClaw global video task tool bridge",
+  "main": "index.js",
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "video-orchestrator",
+  "name": "Video Orchestrator",
+  "version": "0.1.0",
+  "description": "Global OpenClaw tool for asynchronous video generation",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "serviceBaseUrl": {
+        "type": "string",
+        "description": "Base URL of standalone video task service"
+      },
+      "internalToken": {
+        "type": "string",
+        "description": "Internal token used to call video task service"
+      },
+      "requestTimeoutMs": {
+        "type": "number",
+        "minimum": 1000,
+        "description": "Timeout for video service HTTP requests"
+      }
+    }
+  }
+}

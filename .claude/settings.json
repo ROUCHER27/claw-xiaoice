@@ -1,0 +1,26 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://yunyi.rdzhvip.com/claude",
+    "ANTHROPIC_AUTH_TOKEN": "2DZC0U7V-63HD-175A-Q17C-Q3SBPJSCUGJC"
+  },
+  "permissions": {
+    "allow": [
+      "Edit(file_path:/home/yirongbest/claw-xiaoice/**)",
+      "Read(file_path:/home/yirongbest/claw-xiaoice/**)",
+      "Write(file_path:/home/yirongbest/claw-xiaoice/**)",
+      "Bash(command:cp *)",
+      "Bash(command:curl *)",
+      "Bash(command:killall *)",
+      "Bash(command:node *)",
+      "Bash(command:export *)"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "model": "sonnet[1m]",
+  "statusLine": {
+    "type": "command",
+    "command": "echo \"🌿 $(git branch --show-current 2>/dev/null || echo 'no-git') | 🤖 sonnet[1m] | 🔀 $(git status -s 2>/dev/null | wc -l) changes | 📝 $(git log -1 --pretty=%B 2>/dev/null | head -c 30)... | 🌐 $(hostname -I | awk '{print $1}') | 📡 $(netstat -an 2>/dev/null | grep ESTABLISHED | wc -l) conn | 🔢 $(ps aux | wc -l) proc | 🐳 $(docker ps -q 2>/dev/null | wc -l) docker | 📁 $(basename $(pwd))\""
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "thinkingEffort": "high"
+}

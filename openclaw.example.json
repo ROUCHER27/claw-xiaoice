@@ -21,6 +21,18 @@
       "token": "REPLACE_WITH_GATEWAY_TOKEN"
     }
   },
+  "plugins": {
+    "entries": {
+      "video-orchestrator": {
+        "enabled": true,
+        "config": {
+          "serviceBaseUrl": "http://127.0.0.1:3105",
+          "internalToken": "REPLACE_WITH_VIDEO_SERVICE_INTERNAL_TOKEN",
+          "requestTimeoutMs": 15000
+        }
+      }
+    }
+  },
   "models": {
     "mode": "merge",
     "providers": {

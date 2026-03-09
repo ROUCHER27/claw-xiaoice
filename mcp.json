@@ -5,6 +5,17 @@
       "args": [
         "/home/yirongbest/.openclaw/workspace/xiaodouya/xiaodouya_mcp_server.py"
       ]
+    },
+    "gmail": {
+      "enabled": true,
+      "command": "node",
+      "args": [
+        "/home/yirongbest/.openclaw/node_modules/@gongrzhe/server-gmail-autoauth-mcp/dist/index.js"
+      ],
+      "env": {
+        "GMAIL_OAUTH_PATH": "/home/yirongbest/claw-xiaoice/credentials/gmail-mcp/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_PATH": "/home/yirongbest/claw-xiaoice/credentials/gmail-mcp/credentials.json"
+      }
     }
   }
 }

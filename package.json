@@ -5,9 +5,12 @@
   "main": "webhook-proxy-new.js",
   "scripts": {
     "start": "node webhook-proxy-new.js",
+    "start:video-service": "node services/video-task-service/cli.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:video-service": "jest --runTestsByPath __tests__/video-service.test.js",
+    "test:video-plugin": "jest --runTestsByPath __tests__/video-orchestrator-plugin.test.js"
   },
   "keywords": [
     "xiaoice",

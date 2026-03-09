@@ -63,7 +63,11 @@ class MCPManager {
 
       this.clients.set(name, { client, transport, transportType });
 
-      tools.forEach(tool => {
+      // Filter out disabled tools
+      const disabledTools = config.disabledTools || [];
+      const filteredTools = tools.filter(tool => !disabledTools.includes(tool.name));
+
+      filteredTools.forEach(tool => {
         this.tools.set(`${name}:${tool.name}`, {
           server: name,
           tool,
@@ -71,8 +75,12 @@ class MCPManager {
         });
       });
 
-      this.logger.info(`[MCP] Connected to ${name}: ${tools.length} tools available`);
-      return tools;
+      if (disabledTools.length > 0) {
+        this.logger.info(`[MCP] Connected to ${name}: ${filteredTools.length}/${tools.length} tools available (${disabledTools.length} disabled)`);
+      } else {
+        this.logger.info(`[MCP] Connected to ${name}: ${tools.length} tools available`);
+      }
+      return filteredTools;
     } catch (error) {
       this.logger.error(`[MCP] Failed to connect to ${name}: ${error.message}`);
       throw error;
@@ -132,6 +140,9 @@ export default function register(api) {
 
       const pluginConfig = api.config?.plugins?.entries?.['mcp-integration']?.config || {};
       const servers = pluginConfig.servers || {};
+
+      api.logger.info(`[MCP] Plugin config: ${JSON.stringify(pluginConfig, null, 2)}`);
+      api.logger.info(`[MCP] Found ${Object.keys(servers).length} server(s): ${Object.keys(servers).join(', ')}`);
 
       for (const [name, config] of Object.entries(servers)) {
         if (config.enabled === false) {
